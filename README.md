@@ -131,27 +131,38 @@ For detailed instructions, see [QUICKSTART.md](QUICKSTART.md)
 
 ### Getting Started
 - **[Quick Start Guide](QUICKSTART.md)** - 5-minute setup guide
-- **[Troubleshooting](TROUBLESHOOTING.md)** - Common issues and solutions
-- **[One-Pager](ONE_PAGER.md)** - Executive overview
+- **[Troubleshooting](docs/TROUBLESHOOTING.md)** - Common issues and solutions
+- **[One-Pager](docs/ONE_PAGER.md)** - Executive overview
+- **[Pre-Demo Checklist](docs/PRE_DEMO_CHECKLIST.md)** - Demo preparation
 
 ### For Users
-- **[Mobile App Guide](MOBILE_APP.md)** - User guide for the mobile app
-- **[Demo Script](DEMO.md)** - Demonstration walkthrough
+- **[Mobile App Guide](docs/MOBILE_APP.md)** - User guide for the mobile app
+- **[Demo Script](docs/DEMO.md)** - 10-minute demonstration walkthrough
+
+### For Executives
+- **[Executive Summary](docs/EXECUTIVE_SUMMARY.md)** - Business case with ROI analysis
+- **[Rollout Summary](docs/ROLLOUT_SUMMARY.md)** - Company deployment plan
 
 ### For Administrators
-- **[Enterprise Deployment](ENTERPRISE.md)** - Production deployment guide
-- **[Security Hardening](SECURITY_ENTERPRISE.md)** - Security best practices
+- **[Enterprise Deployment](docs/ENTERPRISE.md)** - Production deployment guide
+- **[Deployment Guide](docs/DEPLOYMENT.md)** - Vercel, Railway, and hosting options
+- **[Security Hardening](docs/SECURITY_ENTERPRISE.md)** - Security best practices
+- **[Security Policy](docs/SECURITY.md)** - Security policy and reporting
 - **[Dashboard Guide](dashboard/README.md)** - Dashboard setup and usage
 
 ### Technical Documentation
-- **[Integration Report](PHASE3_INTEGRATION_REPORT.md)** - Integration testing details
-- **[Phase 1 Report](PHASE1_COMPLETION_REPORT.md)** - Backend security infrastructure
-- **[Phase 2 Report](PHASE2_COMPLETION_REPORT.md)** - Mobile app development
-- **[Phase 4 Report](PHASE4_COMPLETION_REPORT.md)** - Dashboard development
+- **[Integration Report](docs/PHASE3_INTEGRATION_REPORT.md)** - Integration testing details
+- **[QA Report](docs/PHASE5_QA_REPORT.md)** - Security audit and UX review
+- **[Phase 1 Report](docs/PHASE1_COMPLETION_REPORT.md)** - Backend security infrastructure
+- **[Phase 2 Report](docs/PHASE2_COMPLETION_REPORT.md)** - Mobile app development
+- **[Phase 4 Report](docs/PHASE4_COMPLETION_REPORT.md)** - Dashboard development
+- **[Phase 6 Report](docs/PHASE6_PM_REPORT.md)** - PM and demo preparation
+- **[Codebase Analysis](docs/CODEBASE_ANALYSIS.md)** - Complete codebase documentation
+- **[Quick Reference](docs/QUICK_REFERENCE.md)** - Developer cheat sheet
+- **[Flutter Setup Guide](docs/FLUTTER_SETUP.md)** - Mobile app testing and development
 
-### Executive Materials
-- **[Executive Summary](EXECUTIVE_SUMMARY.md)** - Business value and ROI
-- **[Pre-Demo Checklist](PRE_DEMO_CHECKLIST.md)** - Demo preparation
+### All Documentation
+- **[📁 View all documentation in docs/ folder](docs/)** - Complete documentation index
 
 ## Demo
 
@@ -163,7 +174,7 @@ Ready to see it in action?
    ```
 
 2. **Follow the demo script:**
-   See [DEMO.md](DEMO.md) for the complete 10-minute demonstration flow
+   See [DEMO.md](docs/DEMO.md) for the complete 10-minute demonstration flow
 
 3. **Key highlights:**
    - QR code pairing (< 3 seconds)
