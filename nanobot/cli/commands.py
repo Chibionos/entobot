@@ -808,6 +808,88 @@ def cron_run(
 
 
 # ============================================================================
+# Pairing Commands (Enterprise Mobile App)
+# ============================================================================
+
+pairing_app = typer.Typer(help="Manage mobile app pairing")
+app.add_typer(pairing_app, name="pairing")
+
+
+@pairing_app.command("generate-qr")
+def pairing_generate_qr(
+    save: bool = typer.Option(False, "--save", "-s", help="Save QR code to file"),
+    output: str = typer.Option("qr_code.png", "--output", "-o", help="Output file path"),
+):
+    """Generate QR code for mobile app pairing."""
+    from nanobot.config.loader import load_config
+    from nanobot.pairing.manager import PairingManager
+    from pathlib import Path
+
+    config = load_config()
+
+    # Determine WebSocket URL
+    ws_host = config.channels.mobile.websocket_port
+    protocol = "wss" if config.channels.mobile.tls_enabled else "ws"
+    websocket_url = f"{protocol}://localhost:{ws_host}"
+
+    # Create pairing manager
+    pairing_manager = PairingManager(
+        websocket_url=websocket_url,
+        session_expiry_minutes=config.auth.pairing_session_expiry_minutes,
+    )
+
+    # Generate pairing session
+    session_id, qr_bytes = pairing_manager.create_pairing_session()
+
+    # Get session details
+    session = pairing_manager.get_session(session_id)
+
+    console.print(f"\n{__logo__} Mobile App Pairing")
+    console.print("=" * 50)
+    console.print(f"\nSession ID: [cyan]{session_id}[/cyan]")
+    console.print(f"WebSocket URL: [cyan]{websocket_url}[/cyan]")
+    console.print(f"Expires in: [yellow]{config.auth.pairing_session_expiry_minutes} minutes[/yellow]")
+
+    if save:
+        # Save QR code to file
+        output_path = Path(output).expanduser()
+        pairing_manager.save_qr_image(qr_bytes, output_path)
+        console.print(f"\n[green]✓[/green] QR code saved to: {output_path}")
+    else:
+        # Display ASCII QR code in terminal
+        console.print("\n[bold]Scan this QR code with your mobile app:[/bold]\n")
+        ascii_qr = pairing_manager.generate_qr_ascii(session_id, session.temp_token)
+        console.print(ascii_qr)
+
+    console.print("\n[bold]Instructions:[/bold]")
+    console.print("1. Open the Entobot mobile app")
+    console.print("2. Tap 'Pair New Device'")
+    console.print("3. Scan the QR code above")
+    console.print("4. Wait for confirmation")
+    console.print("\n[dim]Note: This QR code will expire in 5 minutes[/dim]\n")
+
+
+@pairing_app.command("list")
+def pairing_list():
+    """List active pairing sessions."""
+    from nanobot.config.loader import load_config
+    from nanobot.pairing.manager import PairingManager
+
+    config = load_config()
+    ws_host = config.channels.mobile.websocket_port
+    protocol = "wss" if config.channels.mobile.tls_enabled else "ws"
+    websocket_url = f"{protocol}://localhost:{ws_host}"
+
+    pairing_manager = PairingManager(
+        websocket_url=websocket_url,
+        session_expiry_minutes=config.auth.pairing_session_expiry_minutes,
+    )
+
+    count = pairing_manager.get_active_session_count()
+    console.print(f"Active pairing sessions: {count}")
+
+
+# ============================================================================
 # Status Commands
 # ============================================================================
 

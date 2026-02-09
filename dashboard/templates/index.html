@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Entobot Enterprise Dashboard</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-left">
+            <h1 class="logo">
+                <span class="logo-icon">🤖</span>
+                Entobot Enterprise Dashboard
+            </h1>
+        </div>
+        <div class="header-right">
+            <button id="demoToggle" class="btn btn-secondary">
+                <span class="icon">🎮</span>
+                <span id="demoText">Demo: ON</span>
+            </button>
+            <button id="generateQR" class="btn btn-primary">
+                <span class="icon">📱</span>
+                Generate QR Code
+            </button>
+            <button id="refreshBtn" class="btn btn-secondary">
+                <span class="icon">🔄</span>
+                Refresh
+            </button>
+        </div>
+    </header>
+
+    <!-- Status Cards -->
+    <div class="status-cards">
+        <div class="status-card">
+            <div class="status-card-icon success">📡</div>
+            <div class="status-card-content">
+                <div class="status-card-label">Status</div>
+                <div class="status-card-value" id="systemStatus">Online</div>
+            </div>
+        </div>
+
+        <div class="status-card">
+            <div class="status-card-icon info">📱</div>
+            <div class="status-card-content">
+                <div class="status-card-label">Connected Devices</div>
+                <div class="status-card-value" id="deviceCount">0</div>
+            </div>
+        </div>
+
+        <div class="status-card">
+            <div class="status-card-icon warning">💬</div>
+            <div class="status-card-content">
+                <div class="status-card-label">Active Sessions</div>
+                <div class="status-card-value" id="sessionCount">0</div>
+            </div>
+        </div>
+
+        <div class="status-card">
+            <div class="status-card-icon primary">📊</div>
+            <div class="status-card-content">
+                <div class="status-card-label">Total Messages</div>
+                <div class="status-card-value" id="messageCount">0</div>
+            </div>
+        </div>
+
+        <div class="status-card">
+            <div class="status-card-icon success">⏱️</div>
+            <div class="status-card-content">
+                <div class="status-card-label">Uptime</div>
+                <div class="status-card-value" id="uptime">0h 0m</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content Grid -->
+    <div class="content-grid">
+        <!-- Recent Activity -->
+        <div class="panel">
+            <div class="panel-header">
+                <h2>📋 Recent Activity</h2>
+                <div class="pulse-indicator"></div>
+            </div>
+            <div class="panel-body">
+                <div id="activityFeed" class="activity-feed">
+                    <div class="loading">Loading activity...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Connected Devices -->
+        <div class="panel">
+            <div class="panel-header">
+                <h2>📱 Connected Devices</h2>
+                <span class="badge" id="deviceBadge">0</span>
+            </div>
+            <div class="panel-body">
+                <div id="deviceList" class="device-list">
+                    <div class="loading">Loading devices...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Audit Log -->
+        <div class="panel panel-full">
+            <div class="panel-header">
+                <h2>🔒 Security Audit Log</h2>
+                <button class="btn-icon" id="exportAuditBtn" title="Export audit log">
+                    <span>⬇️</span>
+                </button>
+            </div>
+            <div class="panel-body">
+                <div id="auditLog" class="audit-log">
+                    <div class="loading">Loading audit log...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- QR Code Modal -->
+    <div id="qrModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>📱 Scan to Pair Device</h2>
+                <button class="modal-close" id="closeQR">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="qrLoading" class="loading">Generating QR code...</div>
+                <div id="qrContent" class="qr-content" style="display: none;">
+                    <img id="qrImage" class="qr-image" alt="QR Code">
+                    <div class="qr-info">
+                        <div class="qr-info-item">
+                            <strong>Session ID:</strong>
+                            <code id="qrSessionId">-</code>
+                        </div>
+                        <div class="qr-info-item">
+                            <strong>WebSocket URL:</strong>
+                            <code id="qrWebsocketUrl">-</code>
+                        </div>
+                        <div class="qr-info-item">
+                            <strong>Valid for:</strong>
+                            <span id="qrExpiry" class="badge badge-warning">5 minutes</span>
+                        </div>
+                        <div class="qr-info-item">
+                            <strong>Valid until:</strong>
+                            <span id="qrValidUntil">-</span>
+                        </div>
+                    </div>
+                    <div class="qr-instructions">
+                        <h3>📲 Instructions:</h3>
+                        <ol>
+                            <li>Open the Entobot mobile app on your device</li>
+                            <li>Tap "Add Device" or "Scan QR Code"</li>
+                            <li>Scan this QR code with your device camera</li>
+                            <li>Wait for successful pairing confirmation</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Help Modal -->
+    <div id="helpModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>❓ Dashboard Help</h2>
+                <button class="modal-close" id="closeHelp">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="help-section">
+                    <h3>Getting Started</h3>
+                    <p>The Entobot Enterprise Dashboard provides real-time monitoring and management of your mobile app devices and conversations.</p>
+                </div>
+                <div class="help-section">
+                    <h3>Status Cards</h3>
+                    <ul>
+                        <li><strong>Status:</strong> System operational status (Online/Offline)</li>
+                        <li><strong>Connected Devices:</strong> Number of active mobile devices</li>
+                        <li><strong>Active Sessions:</strong> Number of conversation sessions</li>
+                        <li><strong>Total Messages:</strong> Total messages processed</li>
+                        <li><strong>Uptime:</strong> System uptime since last restart</li>
+                    </ul>
+                </div>
+                <div class="help-section">
+                    <h3>Features</h3>
+                    <ul>
+                        <li><strong>Generate QR Code:</strong> Create pairing QR for new devices</li>
+                        <li><strong>Recent Activity:</strong> Live feed of system events</li>
+                        <li><strong>Connected Devices:</strong> List of paired mobile devices</li>
+                        <li><strong>Audit Log:</strong> Security and system events</li>
+                    </ul>
+                </div>
+                <div class="help-section">
+                    <h3>Demo Mode</h3>
+                    <p>Toggle demo mode to see simulated data when the backend is not running. Perfect for offline demonstrations.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Help Button (Floating) -->
+    <button id="helpBtn" class="help-btn" title="Help">?</button>
+
+    <!-- Connection Status Indicator -->
+    <div id="connectionStatus" class="connection-status">
+        <span class="connection-indicator"></span>
+        <span id="connectionText">Connecting...</span>
+    </div>
+
+    <script src="/static/js/dashboard.js"></script>
+</body>
+</html>

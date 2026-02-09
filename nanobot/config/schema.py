@@ -47,13 +47,57 @@ class DiscordConfig(BaseModel):
     intents: int = 37377  # GUILDS + GUILD_MESSAGES + DIRECT_MESSAGES + MESSAGE_CONTENT
 
 
+class MobileAppConfig(BaseModel):
+    """Mobile app configuration for secure enterprise communication."""
+    enabled: bool = True
+    websocket_port: int = 18791
+    tls_enabled: bool = True
+    tls_cert_path: str | None = None
+    tls_key_path: str | None = None
+    max_connections: int = 100
+    heartbeat_interval: int = 30  # seconds
+
+
+class AuthConfig(BaseModel):
+    """Authentication configuration."""
+    jwt_secret: str = ""  # Must be set for production
+    jwt_algorithm: str = "HS256"
+    jwt_expiry_hours: int = 24 * 30  # 30 days
+    pairing_session_expiry_minutes: int = 5
+    oauth_enabled: bool = False
+    oauth_providers: dict[str, dict[str, str]] = Field(default_factory=dict)
+
+
+class EnterpriseConfig(BaseModel):
+    """Enterprise features configuration."""
+    organization_name: str = ""
+    rate_limit_enabled: bool = True
+    rate_limit_requests_per_minute: int = 60
+    audit_log_enabled: bool = True
+    audit_log_path: str = "~/.nanobot/logs/audit.log"
+    ip_whitelist_enabled: bool = False
+    ip_whitelist: list[str] = Field(default_factory=list)
+
+
+class NetworkConfig(BaseModel):
+    """Network configuration for enterprise deployments."""
+    proxy_enabled: bool = False
+    proxy_url: str | None = None
+    vpn_required: bool = False
+    allowed_origins: list[str] = Field(default_factory=lambda: ["*"])
+
+
 class ChannelsConfig(BaseModel):
     """Configuration for chat channels."""
+    # Legacy relay channels (disabled for enterprise security)
     whatsapp: WhatsAppConfig = Field(default_factory=WhatsAppConfig)
     telegram: TelegramConfig = Field(default_factory=TelegramConfig)
     discord: DiscordConfig = Field(default_factory=DiscordConfig)
     feishu: FeishuConfig = Field(default_factory=FeishuConfig)
     dingtalk: DingTalkConfig = Field(default_factory=DingTalkConfig)
+
+    # Enterprise mobile app
+    mobile: MobileAppConfig = Field(default_factory=MobileAppConfig)
 
 
 class AgentDefaults(BaseModel):
@@ -128,6 +172,11 @@ class Config(BaseSettings):
     providers: ProvidersConfig = Field(default_factory=ProvidersConfig)
     gateway: GatewayConfig = Field(default_factory=GatewayConfig)
     tools: ToolsConfig = Field(default_factory=ToolsConfig)
+
+    # Enterprise features
+    auth: AuthConfig = Field(default_factory=AuthConfig)
+    enterprise: EnterpriseConfig = Field(default_factory=EnterpriseConfig)
+    network: NetworkConfig = Field(default_factory=NetworkConfig)
     
     @property
     def workspace_path(self) -> Path:

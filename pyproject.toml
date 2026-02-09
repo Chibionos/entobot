@@ -28,10 +28,17 @@ dependencies = [
     "readability-lxml>=0.8.0",
     "rich>=13.0.0",
     "croniter>=2.0.0",
-    "dingtalk-stream>=0.4.0",
-    "python-telegram-bot[socks]>=21.0",
-    "lark-oapi>=1.0.0",
+    # Legacy relay channels (disabled for enterprise)
+    # "dingtalk-stream>=0.4.0",
+    # "python-telegram-bot[socks]>=21.0",
+    # "lark-oapi>=1.0.0",
     "socksio>=1.0.0",
+    # Enterprise mobile app dependencies
+    "qrcode>=7.4.0",
+    "Pillow>=10.0.0",
+    "PyJWT>=2.8.0",
+    "fastapi>=0.104.0",
+    "uvicorn>=0.24.0",
 ]
 
 [project.optional-dependencies]
