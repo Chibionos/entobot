@@ -7,7 +7,7 @@ import json
 import ssl
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, TYPE_CHECKING
+from typing import Any, Callable, Awaitable, TYPE_CHECKING
 
 import websockets
 from loguru import logger
@@ -63,12 +63,13 @@ class SecureWebSocketServer:
         port: int,
         pairing_manager: PairingManager,
         jwt_manager: JWTManager,
-        message_bus: MessageBus,
+        message_bus: MessageBus | None = None,
         tls_enabled: bool = False,
         tls_cert_path: Path | None = None,
         tls_key_path: Path | None = None,
         max_connections: int = 100,
         heartbeat_interval: int = 30,
+        on_client_message: Callable[[str, str, str, str], Awaitable[None]] | None = None,
     ):
         """
         Initialize WebSocket server.
@@ -78,12 +79,15 @@ class SecureWebSocketServer:
             port: Server port
             pairing_manager: QR code pairing manager
             jwt_manager: JWT token manager
-            message_bus: Message bus for agent communication
+            message_bus: Message bus for agent communication (None in relay mode)
             tls_enabled: Enable TLS/SSL
             tls_cert_path: Path to TLS certificate
             tls_key_path: Path to TLS private key
             max_connections: Maximum concurrent connections
             heartbeat_interval: Heartbeat interval in seconds
+            on_client_message: Optional callback(device_id, device_name, content, chat_id)
+                               for relay mode. When set, messages are forwarded to this
+                               callback instead of the local message bus.
         """
         self.host = host
         self.port = port
@@ -95,6 +99,7 @@ class SecureWebSocketServer:
         self.tls_key_path = tls_key_path
         self.max_connections = max_connections
         self.heartbeat_interval = heartbeat_interval
+        self.on_client_message = on_client_message
 
         self.authenticated_clients: dict[str, AuthenticatedClient] = {}
         self._server: Any = None
@@ -117,9 +122,12 @@ class SecureWebSocketServer:
             ssl_context.load_cert_chain(str(self.tls_cert_path), str(self.tls_key_path))
             logger.info("TLS/SSL enabled for WebSocket server")
 
-        # Start server
+        # Start server (websockets v16+ passes only websocket, not path)
+        async def _handler(websocket):
+            await self._handle_connection(websocket)
+
         self._server = await websockets.serve(
-            self._handle_connection,
+            _handler,
             self.host,
             self.port,
             ssl=ssl_context,
@@ -156,9 +164,10 @@ class SecureWebSocketServer:
 
         logger.info("Secure WebSocket server stopped")
 
-    async def _handle_connection(self, websocket: WebSocketServerProtocol, path: str) -> None:
+    async def _handle_connection(self, websocket: WebSocketServerProtocol, path: str = "/") -> None:
         """Handle incoming WebSocket connection."""
-        client_ip = websocket.remote_address[0] if websocket.remote_address else "unknown"
+        remote = getattr(websocket, "remote_address", None)
+        client_ip = remote[0] if remote else "unknown"
         logger.info(f"New WebSocket connection from {client_ip}")
 
         try:
@@ -326,16 +335,21 @@ class SecureWebSocketServer:
 
         logger.info(f"Message from {client.device_name} ({device_id}): {content[:50]}...")
 
-        # Publish to message bus for agent processing
-        from nanobot.bus.events import InboundMessage
+        # Forward to callback (relay mode) or publish to local message bus
+        if self.on_client_message:
+            await self.on_client_message(device_id, client.device_name, content, device_id)
+        elif self.message_bus:
+            from nanobot.bus.events import InboundMessage
 
-        inbound_msg = InboundMessage(
-            channel="mobile",
-            chat_id=device_id,
-            sender=client.device_name,
-            content=content,
-        )
-        await self.message_bus.publish_inbound(inbound_msg)
+            inbound_msg = InboundMessage(
+                channel="mobile",
+                chat_id=device_id,
+                sender=client.device_name,
+                content=content,
+            )
+            await self.message_bus.publish_inbound(inbound_msg)
+        else:
+            logger.warning(f"No message handler configured -- dropping message from {device_id}")
 
         # Send acknowledgment
         await self._send_json(websocket, {"type": "ack", "message": "Message received"})

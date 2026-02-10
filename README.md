@@ -25,7 +25,7 @@ The name says it all: **Ento** (内) means *"within"* — security that's built 
 - **Security From Within** — JWT auth, QR pairing, TLS, audit logging, rate limiting — all built in, not optional
 - **11-Provider Intelligent Routing** — Automatic model selection across Gemini, Claude, GPT-4, DeepSeek, Groq, and more
 - **Native Image Generation** — Gemini Nano Banana Pro delivers 4K images with 97% text accuracy directly in-chat
-- **Zero Relay Architecture** — No WhatsApp, Telegram, or Slack middlemen. Direct WebSocket from mobile to your backend
+- **Zero Third-Party Relay** — No WhatsApp, Telegram, or Slack middlemen. Optional Railway relay is YOUR dumb pipe (zero LLM keys)
 - **Air-Gap Ready** — Runs entirely on-premises with local vLLM models. Your data never leaves your infrastructure
 
 ### What Makes This Enterprise-Ready?
@@ -167,6 +167,8 @@ The routing layer in `nanobot/providers/registry.py` automatically matches reque
    - LiteLLM integration — unified interface for all providers
    - JWT authentication + QR pairing — secure device onboarding
    - Security hardening — rate limiting, audit logging, IP whitelist
+   - **Relay server** (`/nanobot/relay/`) — thin message forwarder for Railway (no LLM keys)
+   - **Bridge client** (`/nanobot/bridge/`) — connects local agent to relay for remote access
 
 3. **Web Dashboard** (`/dashboard/`)
    - Real-time device monitoring
@@ -197,12 +199,13 @@ The routing layer in `nanobot/providers/registry.py` automatically matches reque
 
 ## Quick Start
 
-### Set Up Your Local Nanobot (10 minutes)
+### Option A: Local Only (Same Network)
 
 ```bash
 # 1. Clone and install
 git clone https://github.com/Chibionos/entobot.git
 cd entobot
+python -m venv .venv && source .venv/bin/activate
 pip install -e .
 
 # 2. Configure your LLM API keys
@@ -214,26 +217,51 @@ nanobot onboard
 python start_server.py
 # → WebSocket server: ws://localhost:18791
 # → REST API: http://localhost:18790
-# → Dashboard: http://localhost:8080
+
+# 4. Generate QR code and scan with mobile app (same network)
+nanobot pairing generate-qr
 ```
 
-### Tether Your Phone (5 minutes)
+### Option B: Railway Relay (Access from Anywhere) ⭐
 
 ```bash
-# 4. Install Flutter (Arch Linux)
+# 1. Clone, install, and configure (same as above)
+git clone https://github.com/Chibionos/entobot.git
+cd entobot
+python -m venv .venv && source .venv/bin/activate
+pip install -e .
+nanobot onboard   # set your LLM API key (e.g. OpenRouter)
+
+# 2. Generate a bridge token
+python -c "import secrets; print(secrets.token_urlsafe(32))"
+
+# 3. Deploy relay to Railway (see docs/RAILWAY_DEPLOYMENT.md)
+#    Set env vars: BRIDGE_TOKEN=<token>, JWT_SECRET=<secret>
+#    Railway needs ZERO LLM API keys — it's just a message forwarder
+
+# 4. Start the bridge on YOUR machine
+nanobot bridge --relay-url wss://your-app.railway.app --bridge-token <token>
+# → Connects to Railway, all agent execution happens HERE on your machine
+
+# 5. Generate QR code pointing to Railway's public URL
+nanobot pairing generate-qr --relay-url wss://your-app.railway.app
+
+# 6. Scan QR with mobile app — works from anywhere!
+```
+
+### Build the Mobile App
+
+```bash
+# Install Flutter (Arch Linux)
 yay -S flutter
 
-# 5. Build and install the mobile app
+# Build and install
 cd mobile/entobot_flutter
 flutter pub get
 flutter run    # or: flutter build apk --release
-
-# 6. On your phone: scan the QR code shown on the dashboard
-#    → Phone tethers to your local nanobot via WebSocket
-#    → Send a message — it executes on YOUR machine
 ```
 
-**Your phone is now a remote control for the nanobot running on your machine.** Shell commands, file operations, web searches — everything executes locally.
+**Your phone is now a remote control for the nanobot running on your machine.** Shell commands, file operations, web searches — everything executes locally, even when you connect via Railway.
 
 For detailed instructions:
 - **[QUICKSTART.md](QUICKSTART.md)** — Full setup guide
@@ -443,7 +471,7 @@ Ready to see it in action?
 - **Nginx/Caddy** — reverse proxy with TLS termination
 - **Let's Encrypt** — automated TLS certificates
 - **Systemd** — service management and auto-restart
-- **Railway** — recommended cloud deployment platform
+- **Railway** — recommended relay deployment (thin forwarder, zero LLM keys)
 
 ## Deployment Options
 
@@ -466,8 +494,38 @@ python start_server.py   # That's it. Nanobot runs locally.
 - ✅ All execution stays inside your network perimeter
 - 📖 **[Enterprise Deployment Guide](docs/ENTERPRISE.md)**
 
-### 3. Remote Access via Tunnel
-**Best for**: Accessing your local nanobot from outside your network
+### 3. Railway Relay + Local Bridge (Recommended for Remote Access) ⭐
+**Best for**: Accessing your local nanobot from anywhere on the internet
+
+```
+Mobile App ──wss──> Railway Relay (public URL) ──wss──> Local Bridge ──> Agent Loop
+                    (just forwards messages)            (YOUR machine)   (LLM + tools)
+```
+
+Railway runs a **thin relay** — it forwards messages, nothing else. Zero LLM API keys on Railway. All commands, file operations, and LLM calls execute on YOUR machine.
+
+```bash
+# 1. Deploy relay to Railway (needs only BRIDGE_TOKEN + JWT_SECRET)
+#    See docs/RAILWAY_DEPLOYMENT.md
+
+# 2. Start the bridge on your machine (connects OUT to Railway)
+nanobot bridge --relay-url wss://your-app.railway.app --bridge-token <token>
+
+# 3. Generate QR code pointing to Railway URL
+nanobot pairing generate-qr --relay-url wss://your-app.railway.app
+
+# 4. Scan QR with mobile app — done!
+```
+
+- ✅ Agent executes on YOUR machine — your files, your shell, your network
+- ✅ Railway has ZERO LLM API keys — just a dumb pipe
+- ✅ Mobile connects from anywhere (coffee shop, cellular, travel)
+- ✅ Bridge auto-reconnects if your connection drops
+- ✅ No VPN, no port forwarding, no firewall configuration
+- 📖 **[docs/RAILWAY_DEPLOYMENT.md](docs/RAILWAY_DEPLOYMENT.md)**
+
+### 4. Remote Access via Tunnel
+**Best for**: Accessing your local nanobot without a cloud relay
 - ✅ Nanobot still runs on YOUR machine
 - ✅ Tunnel exposes WebSocket port securely to the internet
 - ✅ Options: **Tailscale** (recommended), Cloudflare Tunnel, ngrok, WireGuard
@@ -481,7 +539,7 @@ tailscale up
 cloudflared tunnel --url ws://localhost:18791
 ```
 
-### 4. Air-Gapped (Maximum Security)
+### 5. Air-Gapped (Maximum Security)
 **Best for**: High-security environments, classified networks
 - ✅ Nanobot + vLLM on an isolated machine — zero internet
 - ✅ No external API calls whatsoever
@@ -489,15 +547,7 @@ cloudflared tunnel --url ws://localhost:18791
 - ✅ Maximum data sovereignty
 - 📖 **[Enterprise Deployment Guide](docs/ENTERPRISE.md)**
 
-### ⚠️ Cloud Deployment (Advanced — Understand the Trade-off)
-**Railway, VPS, Cloud VM** — nanobot runs on someone else's infrastructure
-- ⚠️ Commands execute on the **cloud server**, not your local machine
-- ⚠️ This is functionally similar to a relay service (WhatsApp, etc.)
-- ✅ Useful if you WANT a shared team server in the cloud
-- ✅ Useful if you don't need local shell/file execution
-- 📖 **[docs/RAILWAY_DEPLOYMENT.md](docs/RAILWAY_DEPLOYMENT.md)** — if you understand the trade-off
-
-> **Rule of thumb**: If you need the agent to execute commands on your machine, run nanobot locally. If you just need a chat AI accessible from anywhere, cloud deployment works — but you lose the "within" part of EntoBot.
+> **Rule of thumb**: For most users, option 3 (Railway Relay) is the best balance of convenience and security. Your agent runs locally, Railway just forwards messages. If you need maximum security, go air-gapped with option 5.
 
 ## Development
 
@@ -509,14 +559,17 @@ entobot/
 │   ├── agent/           # AI agent logic
 │   ├── api/             # REST API endpoints
 │   ├── auth/            # JWT authentication
+│   ├── bridge/          # Bridge client (local side — connects OUT to relay)
 │   ├── channels/        # Communication channels
 │   ├── gateway/         # WebSocket server
 │   ├── pairing/         # QR code pairing
+│   ├── relay/           # Relay server (Railway side — thin message forwarder)
 │   └── session/         # Session management
 ├── mobile/
 │   └── entobot_flutter/ # Flutter mobile app
 ├── dashboard/           # Web dashboard
-├── start_server.py      # Server startup script
+├── start_server.py      # Standalone server (local-only mode)
+├── Dockerfile           # Railway relay deployment
 └── docs/                # Documentation
 ```
 

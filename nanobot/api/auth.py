@@ -162,3 +162,29 @@ async def revoke_device(device_id: str, request: Request):
     logger.info(f"Device revocation requested: {device_id}")
 
     return {"success": True, "message": f"Device {device_id} access revoked"}
+
+
+@router.post("/pairing/create-session")
+async def create_pairing_session(
+    pairing_manager=Depends(get_pairing_manager),
+):
+    """
+    Create a new pairing session on the relay.
+
+    Called by the local CLI (nanobot pairing generate-qr --relay-url ...)
+    to create a session on the relay, then generate the QR code locally.
+    """
+    try:
+        session_id, qr_bytes = pairing_manager.create_pairing_session()
+        session = pairing_manager.get_session(session_id)
+
+        return {
+            "session_id": session_id,
+            "temp_token": session.temp_token,
+            "websocket_url": pairing_manager.websocket_url,
+            "expires_at": session.expires_at,
+        }
+
+    except Exception as e:
+        logger.error(f"Error creating pairing session: {e}")
+        raise HTTPException(status_code=500, detail="Failed to create pairing session")

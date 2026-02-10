@@ -114,5 +114,9 @@
     "proxy_url": null,
     "vpn_required": false,
     "allowed_origins": ["*"]
+  },
+  "relay": {
+    "public_url": "",
+    "bridge_token": "REPLACE_WITH_STRONG_SECRET"
   }
 }

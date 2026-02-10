@@ -425,6 +425,100 @@ def gateway(
     asyncio.run(run())
 
 
+# ============================================================================
+# Relay Server (deploy to Railway — thin forwarder, no LLM keys)
+# ============================================================================
+
+
+@app.command()
+def relay(
+    port: int = typer.Option(None, "--port", "-p", help="WebSocket port (default: $PORT or 18791)"),
+    api_port: int = typer.Option(18790, "--api-port", help="REST API port"),
+    bridge_token: str = typer.Option(None, "--bridge-token", envvar="BRIDGE_TOKEN", help="Shared secret for bridge auth"),
+    public_url: str = typer.Option(None, "--public-url", envvar="RELAY_PUBLIC_URL", help="Public WebSocket URL"),
+    verbose: bool = typer.Option(False, "--verbose", "-v", help="Verbose output"),
+):
+    """Start the relay server (deploy to Railway — no LLM keys needed)."""
+    from nanobot.config.loader import load_config
+    from nanobot.relay.server import RelayServer
+
+    if verbose:
+        import logging
+        logging.basicConfig(level=logging.DEBUG)
+
+    config = load_config()
+
+    token = bridge_token or config.relay.bridge_token
+    if not token:
+        console.print("[red]Error: BRIDGE_TOKEN required.[/red]")
+        console.print("Set via: --bridge-token, BRIDGE_TOKEN env var, or config relay.bridgeToken")
+        raise typer.Exit(1)
+
+    ws_port = port or int(os.environ.get("PORT", config.channels.mobile.websocket_port))
+
+    server = RelayServer(
+        config=config,
+        bridge_token=token,
+        ws_port=ws_port,
+        api_port=api_port,
+        public_url=public_url or config.relay.public_url,
+    )
+
+    asyncio.run(server.run())
+
+
+# ============================================================================
+# Bridge Client (runs locally — full agent with LLM + tools)
+# ============================================================================
+
+
+@app.command()
+def bridge(
+    relay_url: str = typer.Option(None, "--relay-url", envvar="RELAY_URL", help="Relay WebSocket URL"),
+    bridge_token: str = typer.Option(None, "--bridge-token", envvar="BRIDGE_TOKEN", help="Shared secret for bridge auth"),
+    verbose: bool = typer.Option(False, "--verbose", "-v", help="Verbose output"),
+):
+    """Start the bridge client (runs locally, connects to relay)."""
+    from nanobot.config.loader import load_config
+    from nanobot.bridge.client import BridgeClient
+
+    if verbose:
+        from loguru import logger as _logger
+        _logger.enable("nanobot")
+    else:
+        from loguru import logger as _logger
+        _logger.disable("nanobot")
+
+    config = load_config()
+
+    url = relay_url or config.relay.public_url
+    if not url:
+        console.print("[red]Error: relay URL required.[/red]")
+        console.print("Set via: --relay-url, RELAY_URL env var, or config relay.publicUrl")
+        raise typer.Exit(1)
+
+    # Ensure URL ends with /bridge path
+    if not url.endswith("/bridge"):
+        url = url.rstrip("/") + "/bridge"
+    # Ensure ws:// or wss:// scheme
+    if url.startswith("https://"):
+        url = "wss://" + url[8:]
+    elif url.startswith("http://"):
+        url = "ws://" + url[7:]
+
+    token = bridge_token or config.relay.bridge_token
+    if not token:
+        console.print("[red]Error: BRIDGE_TOKEN required.[/red]")
+        console.print("Set via: --bridge-token, BRIDGE_TOKEN env var, or config relay.bridgeToken")
+        raise typer.Exit(1)
+
+    client = BridgeClient(config=config, relay_url=url, bridge_token=token)
+
+    try:
+        asyncio.run(client.start())
+    except KeyboardInterrupt:
+        console.print("\nBridge stopped.")
+
 
 
 # ============================================================================
@@ -819,6 +913,7 @@ app.add_typer(pairing_app, name="pairing")
 def pairing_generate_qr(
     save: bool = typer.Option(False, "--save", "-s", help="Save QR code to file"),
     output: str = typer.Option("qr_code.png", "--output", "-o", help="Output file path"),
+    relay_url: str = typer.Option(None, "--relay-url", help="Relay public WebSocket URL (for bridge mode)"),
 ):
     """Generate QR code for mobile app pairing."""
     from nanobot.config.loader import load_config
@@ -827,10 +922,15 @@ def pairing_generate_qr(
 
     config = load_config()
 
-    # Determine WebSocket URL
-    ws_host = config.channels.mobile.websocket_port
-    protocol = "wss" if config.channels.mobile.tls_enabled else "ws"
-    websocket_url = f"{protocol}://localhost:{ws_host}"
+    # Determine WebSocket URL — relay URL takes priority
+    if relay_url:
+        websocket_url = relay_url
+    elif config.relay.public_url:
+        websocket_url = config.relay.public_url
+    else:
+        ws_host = config.channels.mobile.websocket_port
+        protocol = "wss" if config.channels.mobile.tls_enabled else "ws"
+        websocket_url = f"{protocol}://localhost:{ws_host}"
 
     # Create pairing manager
     pairing_manager = PairingManager(

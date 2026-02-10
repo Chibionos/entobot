@@ -165,6 +165,16 @@ class ToolsConfig(BaseModel):
     restrict_to_workspace: bool = False  # If true, restrict all tool access to workspace directory
 
 
+class RelayConfig(BaseModel):
+    """Relay/bridge configuration for split deployment.
+
+    The relay runs on Railway (public URL, no LLM keys).
+    The bridge runs locally (agent loop + tools + LLM keys).
+    """
+    public_url: str = ""        # Relay's public WebSocket URL, e.g. "wss://my-app.railway.app"
+    bridge_token: str = ""      # Shared secret between relay and bridge
+
+
 class Config(BaseSettings):
     """Root configuration for nanobot."""
     agents: AgentsConfig = Field(default_factory=AgentsConfig)
@@ -177,6 +187,9 @@ class Config(BaseSettings):
     auth: AuthConfig = Field(default_factory=AuthConfig)
     enterprise: EnterpriseConfig = Field(default_factory=EnterpriseConfig)
     network: NetworkConfig = Field(default_factory=NetworkConfig)
+
+    # Relay/bridge for mobile access from the internet
+    relay: RelayConfig = Field(default_factory=RelayConfig)
     
     @property
     def workspace_path(self) -> Path:
