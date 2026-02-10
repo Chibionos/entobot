@@ -39,6 +39,33 @@ Traditional AI assistants rely on third-party relay services and single-provider
 | **Deployment** | Cloud-only | Cloud, on-prem, or air-gapped |
 | **Compliance** | Varies | SOC2/GDPR/HIPAA architecture |
 
+### Why Not OpenClaw?
+
+[OpenClaw](https://github.com/openclaw/openclaw) is the fastest-growing open-source AI agent (180K+ GitHub stars), but it was designed as a **personal assistant** — not an enterprise platform. Security researchers have documented serious architectural issues that make it risky for business deployment:
+
+<div align="center">
+  <img src="assets/security_comparison.png" alt="Entobot vs OpenClaw Security" width="800">
+  <p><em>Security comparison — generated with Gemini Nano Banana Pro</em></p>
+</div>
+
+**The core architectural differences:**
+
+| Security Concern | OpenClaw | Entobot Enterprise |
+|-----------------|----------|-------------------|
+| **Default Authentication** | None — gateway binds to `0.0.0.0:18789` with no auth ([CrowdStrike](https://www.crowdstrike.com/en-us/blog/what-security-teams-need-to-know-about-openclaw-ai-super-agent/)) | JWT authentication required on every request. QR code pairing with 5-minute expiry tokens |
+| **Network Exposure** | 30,000+ instances exposed on the internet; 1,800+ leaking API keys and chat histories ([The Register](https://www.theregister.com/2026/02/05/openclaw_skills_marketplace_leaky_security/)) | WebSocket server requires authenticated connection. No API exposed without JWT token |
+| **Communication Channel** | Third-party relays (WhatsApp, Discord, email) — each an attack surface for prompt injection ([Trend Micro](https://www.trendmicro.com/en_us/research/26/b/what-openclaw-reveals-about-agentic-assistants.html)) | Direct WebSocket (TLS) — no third-party relay services. Zero external message routing |
+| **Encryption** | HTTP by default — traffic subject to MITM interception ([CrowdStrike](https://www.crowdstrike.com/en-us/blog/what-security-teams-need-to-know-about-openclaw-ai-super-agent/)) | TLS/SSL ready with Let's Encrypt. WebSocket Secure (WSS) for all mobile connections |
+| **Marketplace Supply Chain** | 7.1% of ClawHub skills contain critical flaws exposing credentials in plaintext ([The Register](https://www.theregister.com/2026/02/05/openclaw_skills_marketplace_leaky_security/)) | No public marketplace. Tools are bundled and audited. No untrusted third-party code execution |
+| **Prompt Injection** | Vulnerable via ingested emails, webpages, and documents ([CrowdStrike](https://www.crowdstrike.com/en-us/blog/what-security-teams-need-to-know-about-openclaw-ai-super-agent/)) | Controlled input via authenticated mobile app only. No external data ingestion pipeline |
+| **Privilege Scope** | Often granted root-level access to terminal, files, and shell ([VentureBeat](https://venturebeat.com/security/openclaw-agentic-ai-security-risk-ciso-guide)) | Workspace sandboxing. Agent operates within defined workspace. Configurable tool restrictions |
+| **Lateral Movement** | Compromised agent can autonomously move across infrastructure ([CrowdStrike](https://www.crowdstrike.com/en-us/blog/what-security-teams-need-to-know-about-openclaw-ai-super-agent/)) | Agent loop bounded by `max_tool_iterations` (default: 20). Rate limited to 60 req/min per device |
+| **Audit Trail** | No built-in audit logging | Complete audit logging for every action — SOC2/GDPR/HIPAA compliant |
+| **Air-Gap Deployment** | Requires internet for relay services and marketplace skills | Fully air-gapped with local vLLM. Zero external dependencies |
+| **Shadow IT Risk** | 1 in 5 organizations deployed without IT approval ([Trend Micro](https://www.trendmicro.com/en_us/research/26/b/what-openclaw-reveals-about-agentic-assistants.html)) | Mobile app requires QR pairing with backend. Cannot operate without IT-provisioned backend |
+
+> **Bottom line**: OpenClaw is a powerful personal tool. Entobot Enterprise is built for organizations where security, compliance, and IT control are non-negotiable. Every design decision — from QR pairing to workspace sandboxing to the absence of a public marketplace — reflects an enterprise-first security posture.
+
 ## Key Features
 
 - ✅ **Secure Mobile App** (iOS & Android) — Flutter app with Material Design 3
