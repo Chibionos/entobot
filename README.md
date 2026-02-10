@@ -1,7 +1,7 @@
 # Entobot Enterprise
 
 <div align="center">
-  <img src="nanobot_logo.png" alt="Entobot Enterprise" width="500">
+  <img src="assets/hero_banner.png" alt="Entobot Enterprise" width="600">
   <h2>Enterprise-Grade Mobile AI Platform with Intelligent Multi-Model Routing</h2>
   <p>
     <img src="https://img.shields.io/badge/python-≥3.11-blue" alt="Python">
@@ -58,138 +58,28 @@ Traditional AI assistants rely on third-party relay services and single-provider
 
 ### System Overview
 
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                         ENTOBOT ENTERPRISE PLATFORM                         │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                             │
-│  ┌─────────────┐    ┌─────────────┐    ┌──────────────────────────────────┐ │
-│  │  Mobile App  │    │  Dashboard  │    │      Admin / REST Clients       │ │
-│  │  (Flutter)   │    │  (Web UI)   │    │                                 │ │
-│  │  iOS/Android │    │  Real-time  │    │  curl / Postman / CI/CD         │ │
-│  └──────┬───────┘    └──────┬──────┘    └───────────────┬─────────────────┘ │
-│         │ WSS (TLS)        │ HTTPS                     │ HTTPS              │
-│  ═══════╪══════════════════╪═══════════════════════════╪════════════════    │
-│         │           SECURITY BOUNDARY                  │                    │
-│  ═══════╪══════════════════╪═══════════════════════════╪════════════════    │
-│         ▼                  ▼                           ▼                    │
-│  ┌──────────────────────────────────────────────────────────────────────┐   │
-│  │                      GATEWAY LAYER                                   │   │
-│  │                                                                      │   │
-│  │  ┌──────────────┐  ┌──────────────┐  ┌───────────────────────────┐  │   │
-│  │  │  WebSocket    │  │  REST API    │  │  Security Middleware      │  │   │
-│  │  │  Server       │  │  (FastAPI)   │  │                           │  │   │
-│  │  │  :18791       │  │  :18790      │  │  • JWT Validation         │  │   │
-│  │  │              │  │              │  │  • Rate Limiting (60/min) │  │   │
-│  │  │  • Auth      │  │  • Settings  │  │  • IP Whitelist           │  │   │
-│  │  │  • Pairing   │  │  • Providers │  │  • Audit Logging          │  │   │
-│  │  │  • Messages  │  │  • Health    │  │  • CORS Policy            │  │   │
-│  │  └──────┬───────┘  └──────┬───────┘  └───────────────────────────┘  │   │
-│  └─────────┼─────────────────┼──────────────────────────────────────────┘   │
-│            │                 │                                               │
-│            ▼                 ▼                                               │
-│  ┌──────────────────────────────────────────────────────────────────────┐   │
-│  │                      CORE ENGINE                                     │   │
-│  │                                                                      │   │
-│  │  ┌──────────────┐  ┌──────────────┐  ┌───────────────────────────┐  │   │
-│  │  │  Message Bus  │  │  Agent Loop  │  │  Session Manager          │  │   │
-│  │  │  (Async Q)   │  │              │  │                           │  │   │
-│  │  │              │  │  • Context   │  │  • Device Sessions        │  │   │
-│  │  │  • Inbound   │  │  • History   │  │  • Conversation History   │  │   │
-│  │  │  • Outbound  │  │  • Tools     │  │  • QR Pairing State       │  │   │
-│  │  │  • Routing   │  │  • Iteration │  │  • Token Management       │  │   │
-│  │  └──────┬───────┘  └──────┬───────┘  └───────────────────────────┘  │   │
-│  └─────────┼─────────────────┼──────────────────────────────────────────┘   │
-│            │                 │                                               │
-│            ▼                 ▼                                               │
-│  ┌──────────────────────────────────────────────────────────────────────┐   │
-│  │                INTELLIGENT MODEL ROUTING LAYER                       │   │
-│  │                                                                      │   │
-│  │  ┌─────────────────────────────────────────────────────────────────┐ │   │
-│  │  │  Provider Registry    ─── keyword match ──► Provider Selection  │ │   │
-│  │  │  (11 providers)       ─── gateway fallback ► Auto-routing       │ │   │
-│  │  │                       ─── model override ──► Parameter Tuning   │ │   │
-│  │  └─────────────────────────────────────────────────────────────────┘ │   │
-│  │                                                                      │   │
-│  │  ┌───────────────────────┐  ┌──────────────────────────────────────┐ │   │
-│  │  │  LiteLLM Provider     │  │  Supported Providers                 │ │   │
-│  │  │                       │  │                                      │ │   │
-│  │  │  • Model resolution   │  │  ┌─────────┐ ┌─────────┐ ┌───────┐ │ │   │
-│  │  │  • Prefix management  │  │  │ Gemini  │ │ Claude  │ │ GPT-4 │ │ │   │
-│  │  │  • Gateway detection  │  │  │ NanoBan │ │Anthropic│ │OpenAI │ │ │   │
-│  │  │  • Env var setup      │  │  └─────────┘ └─────────┘ └───────┘ │ │   │
-│  │  │  • Response parsing   │  │  ┌─────────┐ ┌─────────┐ ┌───────┐ │ │   │
-│  │  │  • Reasoning extract  │  │  │DeepSeek │ │  Groq   │ │Moonsh.│ │ │   │
-│  │  │                       │  │  └─────────┘ └─────────┘ └───────┘ │ │   │
-│  │  │  litellm.acompletion  │  │  ┌─────────┐ ┌─────────┐ ┌───────┐ │ │   │
-│  │  │         ▼             │  │  │  Zhipu  │ │DashScope│ │ vLLM  │ │ │   │
-│  │  │  Standardized         │  │  │  (GLM)  │ │ (Qwen)  │ │(Local)│ │ │   │
-│  │  │  LLMResponse          │  │  └─────────┘ └─────────┘ └───────┘ │ │   │
-│  │  └───────────────────────┘  │  ┌──────────┐ ┌────────────────┐   │ │   │
-│  │                             │  │OpenRouter│ │   AiHubMix     │   │ │   │
-│  │                             │  │(Gateway) │ │   (Gateway)    │   │ │   │
-│  │                             │  └──────────┘ └────────────────┘   │ │   │
-│  │                             └──────────────────────────────────────┘ │   │
-│  └──────────────────────────────────────────────────────────────────────┘   │
-│                                                                             │
-└─────────────────────────────────────────────────────────────────────────────┘
-```
+<div align="center">
+  <img src="assets/architecture_diagram.png" alt="Entobot Enterprise Architecture" width="800">
+  <p><em>4-layer enterprise architecture — generated with Gemini Nano Banana Pro</em></p>
+</div>
 
-### Gemini Nano Banana Integration
+**Client Applications** connect via secure WebSocket (TLS) and HTTPS to the **Security Gateway**, which enforces JWT authentication, rate limiting (60 req/min), TLS encryption, and audit logging. The **Core Services** layer handles message routing, multi-turn agent conversations (up to 20 tool iterations), and session management. The **Intelligent Model Routing** layer automatically selects from 11 providers based on model keyword matching, with gateway fallback.
 
-```
-┌──────────────────────────────────────────────────────────────────┐
-│                GEMINI IMAGE GENERATION PIPELINE                   │
-│                                                                   │
-│  Mobile App                  Backend                   Gemini API │
-│  ─────────                  ───────                   ──────────  │
-│                                                                   │
-│  User sends    ──WSS──►  Agent Loop    ──API──►  Nano Banana     │
-│  "Generate a             detects image           (2.5 Flash)     │
-│   logo for               generation              ┌────────────┐ │
-│   our team"              intent                   │ Fast Mode  │ │
-│                                                   │ 3-5 sec    │ │
-│                          Routes to                │ 2K output  │ │
-│                          Gemini provider          │ ~$0.04/img │ │
-│                          via registry             └────────────┘ │
-│                                                                   │
-│  Receives      ◄──WSS──  Returns image  ◄──API──  Nano Banana   │
-│  image in                 + text                   Pro (3 Pro)   │
-│  chat with               response                  ┌────────────┐ │
-│  description                                       │ Pro Mode   │ │
-│                                                    │ Thinking   │ │
-│                                                    │ 4K output  │ │
-│                                                    │ 97% text   │ │
-│                                                    │ 14 refs    │ │
-│                                                    └────────────┘ │
-│                                                                   │
-│  Key: Nano Banana = gemini-2.5-flash-image                       │
-│       Nano Banana Pro = gemini-3-pro-image-preview               │
-└──────────────────────────────────────────────────────────────────┘
-```
+### Secure Mobile Pairing Flow
+
+<div align="center">
+  <img src="assets/mobile_security_flow.png" alt="Mobile Security Flow" width="800">
+  <p><em>QR scan to AI conversation in under 3 seconds — generated with Gemini Nano Banana Pro</em></p>
+</div>
 
 ### Intelligent Model Routing
 
-The routing layer automatically matches requests to the best provider:
+<div align="center">
+  <img src="assets/provider_routing.png" alt="Smart Provider Routing" width="800">
+  <p><em>Automatic keyword-based routing across 11 providers — generated with Gemini Nano Banana Pro</em></p>
+</div>
 
-```
-Request: "Explain quantum computing"
-  │
-  ▼
-Provider Registry (keyword matching)
-  │
-  ├── Model contains "claude"?  ──► Anthropic (Claude 4.5 Opus)
-  ├── Model contains "gpt"?     ──► OpenAI (GPT-4)
-  ├── Model contains "gemini"?  ──► Google (Gemini Pro / Nano Banana)
-  ├── Model contains "deepseek"?──► DeepSeek
-  ├── Model contains "glm"?     ──► Zhipu AI (GLM-4)
-  ├── Model contains "qwen"?    ──► DashScope (Qwen)
-  ├── Model contains "kimi"?    ──► Moonshot (Kimi K2.5)
-  │
-  ├── Has OpenRouter key?       ──► OpenRouter (gateway, any model)
-  ├── Has AiHubMix key?         ──► AiHubMix (gateway, any model)
-  └── Has vLLM configured?      ──► Local inference (air-gapped)
-```
+The routing layer in `nanobot/providers/registry.py` automatically matches requests to the best provider by keyword. Gateways (OpenRouter, AiHubMix) serve as fallbacks, routing to 200+ models. For air-gapped deployments, vLLM provides local inference with zero external API calls.
 
 ### Components
 
