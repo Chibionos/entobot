@@ -67,7 +67,7 @@ Traditional AI assistants rely on third-party relay services and single-provider
 | **Air-Gap Deployment** | Requires internet for relay services and marketplace skills | Fully air-gapped with local vLLM. Zero external dependencies |
 | **Shadow IT Risk** | 1 in 5 organizations deployed without IT approval ([Trend Micro](https://www.trendmicro.com/en_us/research/26/b/what-openclaw-reveals-about-agentic-assistants.html)) | Mobile app requires QR pairing with backend. Cannot operate without IT-provisioned backend |
 
-> **Bottom line**: OpenClaw is a powerful personal tool. EntoBot is built for organizations where security, compliance, and IT control are non-negotiable. Every design decision — from QR pairing to workspace sandboxing to the absence of a public marketplace — reflects an enterprise-first security posture.
+> **Bottom line**: Both OpenClaw and EntoBot run locally — that's the right foundation. But OpenClaw exposes itself to the network without authentication, relays through third-party services, and has a marketplace where 7% of skills leak credentials. EntoBot keeps the local execution model while adding the security layer enterprises need: JWT auth, QR pairing, workspace sandboxing, audit logging, and zero relay dependencies. Security from within (内).
 
 ## Key Features
 
@@ -86,21 +86,58 @@ Traditional AI assistants rely on third-party relay services and single-provider
 
 ## Architecture
 
-### System Overview
+### Local-First: Your Machine, Your Data, Your Rules
+
+**EntoBot runs on YOUR machine.** The mobile app is a remote control that tethers in — it does not relay your commands through a cloud service. When you ask EntoBot to run a shell command, read a file, or search the web, that happens **locally on the machine running nanobot**.
 
 <div align="center">
-  <img src="assets/architecture_diagram.png" alt="EntoBot Architecture" width="800">
-  <p><em>4-layer enterprise architecture — generated with Gemini Nano Banana Pro</em></p>
+  <img src="assets/local_first_architecture.png" alt="EntoBot Local-First Architecture" width="800">
+  <p><em>Not WhatsApp. Not Railway. Your machine. — generated with Gemini Nano Banana Pro</em></p>
 </div>
 
-**Client Applications** connect via secure WebSocket (TLS) and HTTPS to the **Security Gateway**, which enforces JWT authentication, rate limiting (60 req/min), TLS encryption, and audit logging. The **Core Services** layer handles message routing, multi-turn agent conversations (up to 20 tool iterations), and session management. The **Intelligent Model Routing** layer automatically selects from 11 providers based on model keyword matching, with gateway fallback.
+**How it works:**
 
-### Secure Mobile Pairing Flow
+1. You install and run `nanobot` on your machine (laptop, desktop, or on-prem server)
+2. The mobile app connects to your machine via WebSocket (`ws://your-machine:18791`)
+3. You send a message from your phone — it hits the **Agent Loop** running on your machine
+4. The agent calls LLMs (Gemini, Claude, GPT-4) for reasoning, then executes tools **locally**:
+   - **Shell Exec** — runs commands on your machine's terminal
+   - **File System** — reads, writes, and edits files on your machine
+   - **Web Search / Fetch** — browses the internet from your machine
+   - **Subagents** — spawns background tasks on your machine
+5. The response flows back to your phone via WebSocket
+
+**Only LLM API calls leave your machine** (to OpenRouter, Gemini, etc.). Even those can stay local with **vLLM** for fully air-gapped operation.
+
+> This is the opposite of WhatsApp/Telegram relay architecture. There is no middleman. Your phone talks directly to your nanobot. Commands execute where your data lives.
+
+### System Layers
 
 <div align="center">
-  <img src="assets/mobile_security_flow.png" alt="Mobile Security Flow" width="800">
-  <p><em>QR scan to AI conversation in under 3 seconds — generated with Gemini Nano Banana Pro</em></p>
+  <img src="assets/architecture_diagram.png" alt="EntoBot System Layers" width="800">
+  <p><em>4-layer system architecture — generated with Gemini Nano Banana Pro</em></p>
 </div>
+
+| Layer | What It Does | Where It Runs |
+|-------|-------------|---------------|
+| **Client Applications** | Mobile app, web dashboard, REST clients | Your phone / browser |
+| **Security Gateway** | JWT auth, rate limiting (60/min), TLS, audit log | Your machine |
+| **Core Services** | WebSocket server, message bus, agent loop, session manager | Your machine |
+| **Model Routing** | 11-provider keyword matching, LiteLLM, gateway fallback | Your machine → LLM APIs |
+
+### Secure Mobile Tethering
+
+<div align="center">
+  <img src="assets/mobile_security_flow.png" alt="Mobile Tethering Flow" width="800">
+  <p><em>QR scan to tether your phone to your local nanobot — generated with Gemini Nano Banana Pro</em></p>
+</div>
+
+Your phone **tethers into** the local nanobot — it doesn't route through a third-party service. The pairing flow:
+
+1. **Scan QR Code** (< 3 sec) — nanobot generates a QR with a temporary token
+2. **JWT Authentication** (auto) — phone receives a JWT for future connections
+3. **Secure WebSocket** (persistent) — direct channel to your machine
+4. **AI Conversation** (real-time) — commands execute locally, responses stream back
 
 ### Intelligent Model Routing
 
@@ -109,7 +146,7 @@ Traditional AI assistants rely on third-party relay services and single-provider
   <p><em>Automatic keyword-based routing across 11 providers — generated with Gemini Nano Banana Pro</em></p>
 </div>
 
-The routing layer in `nanobot/providers/registry.py` automatically matches requests to the best provider by keyword. Gateways (OpenRouter, AiHubMix) serve as fallbacks, routing to 200+ models. For air-gapped deployments, vLLM provides local inference with zero external API calls.
+The routing layer in `nanobot/providers/registry.py` automatically matches requests to the best provider by keyword. Gateways (OpenRouter, AiHubMix) serve as fallbacks, routing to 200+ models. For air-gapped deployments, vLLM provides **fully local inference** with zero external API calls — everything stays on your machine.
 
 ### Components
 
@@ -152,57 +189,56 @@ The routing layer in `nanobot/providers/registry.py` automatically matches reque
 
 ### Quick Actions
 
-- **📱 Test Mobile App**: Install Flutter → See [INSTALL_FLUTTER_ARCH.md](INSTALL_FLUTTER_ARCH.md)
-- **☁️ Deploy to Production**: Use Railway → See [docs/RAILWAY_DEPLOYMENT.md](docs/RAILWAY_DEPLOYMENT.md)
+- **🖥️ Run Locally**: `pip install -e . && python start_server.py`
+- **📱 Tether Mobile**: Install Flutter app → Scan QR → See [INSTALL_FLUTTER_ARCH.md](INSTALL_FLUTTER_ARCH.md)
 - **📖 Full Documentation**: Browse [docs/](docs/) folder
 
 ---
 
 ## Quick Start
 
-### Option 1: Local Testing (5 minutes)
+### Set Up Your Local Nanobot (10 minutes)
 
 ```bash
-# 1. Install Flutter (Arch Linux)
+# 1. Clone and install
+git clone https://github.com/Chibionos/entobot.git
+cd entobot
+pip install -e .
+
+# 2. Configure your LLM API keys
+nanobot onboard
+# Or edit ~/.nanobot/config.json directly
+# At minimum, set one provider API key (e.g. OpenRouter, Gemini, or OpenAI)
+
+# 3. Start your local nanobot
+python start_server.py
+# → WebSocket server: ws://localhost:18791
+# → REST API: http://localhost:18790
+# → Dashboard: http://localhost:8080
+```
+
+### Tether Your Phone (5 minutes)
+
+```bash
+# 4. Install Flutter (Arch Linux)
 yay -S flutter
 
-# 2. Test mobile app
+# 5. Build and install the mobile app
 cd mobile/entobot_flutter
 flutter pub get
-flutter run
+flutter run    # or: flutter build apk --release
 
-# 3. Start backend (separate terminal)
-python start_server.py
-
-# 4. Open dashboard
-# Visit http://localhost:8080
+# 6. On your phone: scan the QR code shown on the dashboard
+#    → Phone tethers to your local nanobot via WebSocket
+#    → Send a message — it executes on YOUR machine
 ```
 
-### Option 2: Production Deployment (15 minutes)
-
-```bash
-# 1. Install Railway CLI
-npm install -g @railway/cli
-
-# 2. Deploy backend
-railway login
-railway up
-
-# 3. Update mobile app with Railway URL
-# Edit mobile/entobot_flutter/lib/core/utils/constants.dart
-
-# 4. Build mobile app
-cd mobile/entobot_flutter
-flutter build apk --release
-
-# 5. Generate QR code and demo
-railway run nanobot pairing generate-qr
-```
+**Your phone is now a remote control for the nanobot running on your machine.** Shell commands, file operations, web searches — everything executes locally.
 
 For detailed instructions:
-- **[QUICKSTART.md](QUICKSTART.md)** - Local development setup
-- **[docs/RAILWAY_DEPLOYMENT.md](docs/RAILWAY_DEPLOYMENT.md)** - Production deployment
-- **[INSTALL_FLUTTER_ARCH.md](INSTALL_FLUTTER_ARCH.md)** - Flutter installation (Arch Linux)
+- **[QUICKSTART.md](QUICKSTART.md)** — Full setup guide
+- **[INSTALL_FLUTTER_ARCH.md](INSTALL_FLUTTER_ARCH.md)** — Flutter on Arch Linux
+- **[docs/FLUTTER_SETUP.md](docs/FLUTTER_SETUP.md)** — Flutter setup for all platforms
 
 ## Documentation
 
@@ -221,9 +257,9 @@ For detailed instructions:
 - **[Rollout Summary](docs/ROLLOUT_SUMMARY.md)** - Company deployment plan
 
 ### For Administrators
-- **[Railway Deployment](docs/RAILWAY_DEPLOYMENT.md)** - **RECOMMENDED** production deployment
-- **[Enterprise Deployment](docs/ENTERPRISE.md)** - Advanced deployment guide
-- **[Deployment Guide](docs/DEPLOYMENT.md)** - Alternative hosting options
+- **[Enterprise Deployment](docs/ENTERPRISE.md)** - On-premises and corporate deployment
+- **[Deployment Guide](docs/DEPLOYMENT.md)** - Deployment options and tunneling
+- **[Railway Deployment](docs/RAILWAY_DEPLOYMENT.md)** - Cloud deployment (advanced, see trade-offs)
 - **[Security Hardening](docs/SECURITY_ENTERPRISE.md)** - Security best practices
 - **[Security Policy](docs/SECURITY.md)** - Security policy and reporting
 - **[Dashboard Guide](dashboard/README.md)** - Dashboard setup and usage
@@ -265,6 +301,14 @@ Ready to see it in action?
 
 ### Why Choose EntoBot?
 
+**Local Execution — The Core Principle**
+- Nanobot runs **inside your corporate network** on machines you control
+- Shell commands execute on YOUR infrastructure, not a cloud service
+- File operations happen on YOUR filesystem
+- Mobile app is a **secure remote control**, not a relay
+- Nothing leaves your network unless you choose to call external LLM APIs
+- Air-gap ready: run with local vLLM, zero external calls
+
 **No Vendor Lock-In**
 - 11 LLM providers with automatic routing
 - Switch providers without code changes — just update config
@@ -277,27 +321,20 @@ Ready to see it in action?
 - Nano Banana Pro: professional 4K output with legible text
 - Generate marketing assets, diagrams, and infographics in-chat
 - SynthID watermarking for AI content provenance
-- No separate image API — it's built into the conversation flow
 
-**Security First**
-- No data leaves your infrastructure
+**Security From Within (内)**
 - JWT authentication with automatic expiry
+- QR code pairing with 5-minute temporary tokens
 - TLS/SSL encryption in transit
 - Complete audit logging for compliance
 - Rate limiting (60 req/min) and DDoS protection
+- Workspace sandboxing — agent confined to defined directory
 - IP whitelist support
 - OAuth2/SAML/SSO ready
 
-**Deployment Flexibility**
-- On-premises with vLLM (fully air-gapped)
-- Private cloud (AWS, Azure, GCP)
-- Railway for managed deployment
-- Behind corporate firewalls and VPNs
-- Multi-region support
-
 **Compliance Ready**
 - SOC2 audit trail features
-- GDPR data privacy controls
+- GDPR data privacy controls — data stays on your machine
 - HIPAA-ready architecture
 - Complete activity logging
 - Data retention policies
@@ -410,48 +447,57 @@ Ready to see it in action?
 
 ## Deployment Options
 
-### 1. Railway (Recommended) ⭐
-**Best for**: Production deployments, all team sizes
-- ✅ Supports long-running WebSocket servers
-- ✅ Automatic HTTPS and custom domains
-- ✅ Built-in monitoring and logs
-- ✅ Free tier available ($5/month credit)
-- 📖 **[Railway Deployment Guide](docs/RAILWAY_DEPLOYMENT.md)**
+### 1. Your Own Machine (Primary) ⭐
+**Best for**: Personal use, development, small teams
+```bash
+python start_server.py   # That's it. Nanobot runs locally.
+```
+- ✅ Commands execute on YOUR machine — your files, your shell, your network
+- ✅ Mobile app tethers in via WebSocket on same network
+- ✅ Zero cloud dependencies (add vLLM for fully offline)
+- ✅ Full control over everything
+- 📖 **[QUICKSTART.md](QUICKSTART.md)**
 
-### 2. Standalone Server
-**Best for**: Small teams (< 50 users), on-premises
-- ✅ Full control over infrastructure
-- ✅ Run on your own hardware
-- ✅ No external dependencies
+### 2. On-Premises Server
+**Best for**: Teams, corporate environments
+- ✅ Nanobot runs on a server YOU control (rack server, VM, etc.)
+- ✅ Mobile apps tether in over corporate network / VPN
+- ✅ IT controls the server, users control their phones
+- ✅ All execution stays inside your network perimeter
 - 📖 **[Enterprise Deployment Guide](docs/ENTERPRISE.md)**
 
-### 3. High Availability Cluster
-**Best for**: Medium deployments (50-500 users)
-- ✅ Load balanced for redundancy
-- ✅ Zero-downtime updates
-- ✅ Horizontal scaling
+### 3. Remote Access via Tunnel
+**Best for**: Accessing your local nanobot from outside your network
+- ✅ Nanobot still runs on YOUR machine
+- ✅ Tunnel exposes WebSocket port securely to the internet
+- ✅ Options: **Tailscale** (recommended), Cloudflare Tunnel, ngrok, WireGuard
+- ✅ Mobile app connects to tunnel URL instead of `localhost`
+```bash
+# Example with Tailscale (zero config VPN)
+tailscale up
+# Mobile app connects to: ws://your-machine.tailnet:18791
+
+# Example with Cloudflare Tunnel
+cloudflared tunnel --url ws://localhost:18791
+```
+
+### 4. Air-Gapped (Maximum Security)
+**Best for**: High-security environments, classified networks
+- ✅ Nanobot + vLLM on an isolated machine — zero internet
+- ✅ No external API calls whatsoever
+- ✅ Mobile connects over isolated network or USB tethering
+- ✅ Maximum data sovereignty
 - 📖 **[Enterprise Deployment Guide](docs/ENTERPRISE.md)**
 
-### 4. Cloud Native (Kubernetes)
-**Best for**: Large scale (500+ users), multi-region
-- ✅ Auto-scaling
-- ✅ Multi-region deployment
-- ✅ Advanced orchestration
-- 📖 **[Enterprise Deployment Guide](docs/ENTERPRISE.md)**
+### ⚠️ Cloud Deployment (Advanced — Understand the Trade-off)
+**Railway, VPS, Cloud VM** — nanobot runs on someone else's infrastructure
+- ⚠️ Commands execute on the **cloud server**, not your local machine
+- ⚠️ This is functionally similar to a relay service (WhatsApp, etc.)
+- ✅ Useful if you WANT a shared team server in the cloud
+- ✅ Useful if you don't need local shell/file execution
+- 📖 **[docs/RAILWAY_DEPLOYMENT.md](docs/RAILWAY_DEPLOYMENT.md)** — if you understand the trade-off
 
-### 5. Air-Gapped
-**Best for**: High-security environments, no internet access
-- ✅ Completely offline with local LLM models
-- ✅ No external API calls
-- ✅ Maximum security and privacy
-- 📖 **[Enterprise Deployment Guide](docs/ENTERPRISE.md)**
-
-### ❌ Not Recommended: Vercel
-Vercel is **not suitable** for EntoBot because:
-- ❌ No support for long-running processes (WebSocket server)
-- ❌ No support for persistent connections
-- ❌ Designed for serverless functions, not stateful services
-- ℹ️ Dashboard-only deployment may work, but full backend requires Railway or alternative
+> **Rule of thumb**: If you need the agent to execute commands on your machine, run nanobot locally. If you just need a chat AI accessible from anywhere, cloud deployment works — but you lose the "within" part of EntoBot.
 
 ## Development
 
