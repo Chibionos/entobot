@@ -2,101 +2,227 @@
 
 <div align="center">
   <img src="nanobot_logo.png" alt="Entobot Enterprise" width="500">
-  <h2>Enterprise-Grade Mobile AI Assistant Platform</h2>
+  <h2>Enterprise-Grade Mobile AI Platform with Intelligent Multi-Model Routing</h2>
   <p>
     <img src="https://img.shields.io/badge/python-≥3.11-blue" alt="Python">
     <img src="https://img.shields.io/badge/flutter-3.0+-02569B?logo=flutter" alt="Flutter">
+    <img src="https://img.shields.io/badge/gemini-nano_banana-4285F4?logo=google" alt="Gemini">
+    <img src="https://img.shields.io/badge/providers-11_LLMs-orange" alt="Providers">
     <img src="https://img.shields.io/badge/license-MIT-green" alt="License">
-    <img src="https://img.shields.io/badge/status-demo--ready-success" alt="Status">
+    <img src="https://img.shields.io/badge/status-enterprise--ready-success" alt="Status">
   </p>
 </div>
 
 ## What is Entobot Enterprise?
 
-Entobot Enterprise is a **secure, mobile-first AI assistant platform** designed for enterprise deployment. Born from the ultra-lightweight [nanobot](https://github.com/HKUDS/nanobot) architecture, it has been transformed into a production-ready enterprise solution with:
+Entobot Enterprise is a **secure, mobile-first AI platform** with **intelligent multi-model routing** across 11 LLM providers — including Google's latest **Gemini Nano Banana** and **Nano Banana Pro** models for native image generation. Built on the ultra-lightweight [nanobot](https://github.com/HKUDS/nanobot) architecture, it delivers enterprise-grade AI capabilities through a single mobile app with zero third-party relay dependencies.
 
-- Native mobile apps (iOS & Android)
-- Secure QR code device pairing
-- Enterprise authentication (JWT, OAuth2-ready)
-- Real-time monitoring dashboard
-- Complete audit logging
-- Direct backend-to-mobile communication
-- Corporate network compatibility
+**What sets it apart:**
+
+- **11-Provider Intelligent Routing** — Automatic model selection across Gemini, Claude, GPT-4, DeepSeek, Groq, and more
+- **Native Image Generation** — Gemini Nano Banana Pro delivers 4K images with 97% text accuracy directly in-chat
+- **Zero Relay Architecture** — No WhatsApp, Telegram, or Slack middlemen. Direct WebSocket from mobile to your backend
+- **Mobile-Controlled Security** — QR code pairing, JWT auth, and full settings control from your phone
+- **Air-Gap Ready** — Runs entirely on-premises with local vLLM models. Your data never leaves your infrastructure
 
 ### What Makes This Enterprise-Ready?
 
-Traditional AI assistants rely on third-party relay services (WhatsApp, Telegram, Slack). **Entobot Enterprise eliminates all third-party dependencies** and provides:
+Traditional AI assistants rely on third-party relay services and single-provider lock-in. **Entobot Enterprise eliminates both problems:**
 
-- **Direct Communication**: Mobile devices connect directly to your backend via secure WebSocket
-- **Zero External Dependencies**: No WhatsApp, Telegram, or other relay services required
-- **Complete Control**: Your data never leaves your infrastructure
-- **Enterprise Security**: JWT authentication, TLS encryption, audit logging, rate limiting
-- **Corporate Compatible**: Works within VPNs, corporate firewalls, and air-gapped networks
-- **Compliance-Ready**: Built with SOC2, GDPR, and HIPAA requirements in mind
+| Problem | Traditional | Entobot Enterprise |
+|---------|-----------|-------------------|
+| **Communication** | WhatsApp/Telegram relay | Direct WSS to your backend |
+| **Data Control** | Data passes through 3rd parties | Data never leaves your infra |
+| **Model Lock-in** | Single provider | 11 providers, auto-routing |
+| **Image Generation** | Separate tools/APIs | Native via Gemini Nano Banana |
+| **Security** | Provider-dependent | JWT + TLS + audit + rate limiting |
+| **Deployment** | Cloud-only | Cloud, on-prem, or air-gapped |
+| **Compliance** | Varies | SOC2/GDPR/HIPAA architecture |
 
 ## Key Features
 
-- ✅ **Secure Mobile App** (iOS & Android) - Native Flutter app with beautiful UI
-- ✅ **QR Code Device Pairing** - 5-minute pairing with temporary tokens
-- ✅ **Enterprise Authentication** - JWT tokens, OAuth2/SAML ready, SSO integration points
-- ✅ **Real-Time Monitoring Dashboard** - Professional web dashboard with live metrics
-- ✅ **Complete Audit Logging** - Every action logged for compliance
-- ✅ **No Third-Party Relay Services** - Direct backend communication
-- ✅ **Corporate Network Compatible** - Works in VPNs, behind firewalls
-- ✅ **Multi-LLM Support** - OpenRouter, OpenAI, Anthropic, DeepSeek, local vLLM
-- ✅ **Horizontal Scalability** - 100+ concurrent connections per instance
-- ✅ **Mobile-First Settings** - Configure AI models from your phone
-- ✅ **WebSocket Real-Time** - Low latency (< 500ms) message delivery
+- ✅ **Secure Mobile App** (iOS & Android) — Flutter app with Material Design 3
+- ✅ **QR Code Device Pairing** — 5-minute temporary tokens, camera-based scan
+- ✅ **11-Provider LLM Routing** — Gemini, Claude, GPT-4, DeepSeek, Groq, Moonshot, Zhipu, DashScope, vLLM, OpenRouter, AiHubMix
+- ✅ **Gemini Nano Banana** — Fast image generation (~$0.039/image), 2K resolution, 3-5 second generation
+- ✅ **Gemini Nano Banana Pro** — Professional 4K images, thinking mode, 97% text accuracy, 14 reference images
+- ✅ **Enterprise Authentication** — JWT tokens, OAuth2/SAML ready, SSO integration points
+- ✅ **Real-Time Dashboard** — Professional monitoring with live metrics and audit log
+- ✅ **Complete Audit Logging** — Every action logged for compliance
+- ✅ **No Third-Party Relay** — Direct backend communication via secure WebSocket
+- ✅ **Corporate Network Compatible** — Works in VPNs, behind firewalls, air-gapped
+- ✅ **Mobile-First Settings** — Configure models, temperature, and providers from your phone
+- ✅ **WebSocket Real-Time** — Low latency (< 500ms) message delivery
 
 ## Architecture
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                    ENTERPRISE ENTOBOT                        │
-└─────────────────────────────────────────────────────────────┘
+### System Overview
 
-┌──────────────────┐         ┌──────────────────┐
-│  Mobile App      │ WSS     │                  │
-│  (iOS/Android)   │◄────────┤                  │
-└──────────────────┘         │                  │
-                             │  Backend Server  │
-┌──────────────────┐  HTTPS  │  (Python)        │
-│  Web Dashboard   │◄────────┤                  │
-└──────────────────┘         │  • WebSocket     │
-                             │  • REST API      │
-                             │  • Message Bus   │
-┌──────────────────┐         │  • Agent Loop    │
-│  LLM Providers   │◄────────┤  • Auth/JWT      │
-│  (OpenRouter,    │  API    │  • Audit Log     │
-│   OpenAI, etc.)  │         │                  │
-└──────────────────┘         └──────────────────┘
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                         ENTOBOT ENTERPRISE PLATFORM                         │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  ┌─────────────┐    ┌─────────────┐    ┌──────────────────────────────────┐ │
+│  │  Mobile App  │    │  Dashboard  │    │      Admin / REST Clients       │ │
+│  │  (Flutter)   │    │  (Web UI)   │    │                                 │ │
+│  │  iOS/Android │    │  Real-time  │    │  curl / Postman / CI/CD         │ │
+│  └──────┬───────┘    └──────┬──────┘    └───────────────┬─────────────────┘ │
+│         │ WSS (TLS)        │ HTTPS                     │ HTTPS              │
+│  ═══════╪══════════════════╪═══════════════════════════╪════════════════    │
+│         │           SECURITY BOUNDARY                  │                    │
+│  ═══════╪══════════════════╪═══════════════════════════╪════════════════    │
+│         ▼                  ▼                           ▼                    │
+│  ┌──────────────────────────────────────────────────────────────────────┐   │
+│  │                      GATEWAY LAYER                                   │   │
+│  │                                                                      │   │
+│  │  ┌──────────────┐  ┌──────────────┐  ┌───────────────────────────┐  │   │
+│  │  │  WebSocket    │  │  REST API    │  │  Security Middleware      │  │   │
+│  │  │  Server       │  │  (FastAPI)   │  │                           │  │   │
+│  │  │  :18791       │  │  :18790      │  │  • JWT Validation         │  │   │
+│  │  │              │  │              │  │  • Rate Limiting (60/min) │  │   │
+│  │  │  • Auth      │  │  • Settings  │  │  • IP Whitelist           │  │   │
+│  │  │  • Pairing   │  │  • Providers │  │  • Audit Logging          │  │   │
+│  │  │  • Messages  │  │  • Health    │  │  • CORS Policy            │  │   │
+│  │  └──────┬───────┘  └──────┬───────┘  └───────────────────────────┘  │   │
+│  └─────────┼─────────────────┼──────────────────────────────────────────┘   │
+│            │                 │                                               │
+│            ▼                 ▼                                               │
+│  ┌──────────────────────────────────────────────────────────────────────┐   │
+│  │                      CORE ENGINE                                     │   │
+│  │                                                                      │   │
+│  │  ┌──────────────┐  ┌──────────────┐  ┌───────────────────────────┐  │   │
+│  │  │  Message Bus  │  │  Agent Loop  │  │  Session Manager          │  │   │
+│  │  │  (Async Q)   │  │              │  │                           │  │   │
+│  │  │              │  │  • Context   │  │  • Device Sessions        │  │   │
+│  │  │  • Inbound   │  │  • History   │  │  • Conversation History   │  │   │
+│  │  │  • Outbound  │  │  • Tools     │  │  • QR Pairing State       │  │   │
+│  │  │  • Routing   │  │  • Iteration │  │  • Token Management       │  │   │
+│  │  └──────┬───────┘  └──────┬───────┘  └───────────────────────────┘  │   │
+│  └─────────┼─────────────────┼──────────────────────────────────────────┘   │
+│            │                 │                                               │
+│            ▼                 ▼                                               │
+│  ┌──────────────────────────────────────────────────────────────────────┐   │
+│  │                INTELLIGENT MODEL ROUTING LAYER                       │   │
+│  │                                                                      │   │
+│  │  ┌─────────────────────────────────────────────────────────────────┐ │   │
+│  │  │  Provider Registry    ─── keyword match ──► Provider Selection  │ │   │
+│  │  │  (11 providers)       ─── gateway fallback ► Auto-routing       │ │   │
+│  │  │                       ─── model override ──► Parameter Tuning   │ │   │
+│  │  └─────────────────────────────────────────────────────────────────┘ │   │
+│  │                                                                      │   │
+│  │  ┌───────────────────────┐  ┌──────────────────────────────────────┐ │   │
+│  │  │  LiteLLM Provider     │  │  Supported Providers                 │ │   │
+│  │  │                       │  │                                      │ │   │
+│  │  │  • Model resolution   │  │  ┌─────────┐ ┌─────────┐ ┌───────┐ │ │   │
+│  │  │  • Prefix management  │  │  │ Gemini  │ │ Claude  │ │ GPT-4 │ │ │   │
+│  │  │  • Gateway detection  │  │  │ NanoBan │ │Anthropic│ │OpenAI │ │ │   │
+│  │  │  • Env var setup      │  │  └─────────┘ └─────────┘ └───────┘ │ │   │
+│  │  │  • Response parsing   │  │  ┌─────────┐ ┌─────────┐ ┌───────┐ │ │   │
+│  │  │  • Reasoning extract  │  │  │DeepSeek │ │  Groq   │ │Moonsh.│ │ │   │
+│  │  │                       │  │  └─────────┘ └─────────┘ └───────┘ │ │   │
+│  │  │  litellm.acompletion  │  │  ┌─────────┐ ┌─────────┐ ┌───────┐ │ │   │
+│  │  │         ▼             │  │  │  Zhipu  │ │DashScope│ │ vLLM  │ │ │   │
+│  │  │  Standardized         │  │  │  (GLM)  │ │ (Qwen)  │ │(Local)│ │ │   │
+│  │  │  LLMResponse          │  │  └─────────┘ └─────────┘ └───────┘ │ │   │
+│  │  └───────────────────────┘  │  ┌──────────┐ ┌────────────────┐   │ │   │
+│  │                             │  │OpenRouter│ │   AiHubMix     │   │ │   │
+│  │                             │  │(Gateway) │ │   (Gateway)    │   │ │   │
+│  │                             │  └──────────┘ └────────────────┘   │ │   │
+│  │                             └──────────────────────────────────────┘ │   │
+│  └──────────────────────────────────────────────────────────────────────┘   │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+### Gemini Nano Banana Integration
+
+```
+┌──────────────────────────────────────────────────────────────────┐
+│                GEMINI IMAGE GENERATION PIPELINE                   │
+│                                                                   │
+│  Mobile App                  Backend                   Gemini API │
+│  ─────────                  ───────                   ──────────  │
+│                                                                   │
+│  User sends    ──WSS──►  Agent Loop    ──API──►  Nano Banana     │
+│  "Generate a             detects image           (2.5 Flash)     │
+│   logo for               generation              ┌────────────┐ │
+│   our team"              intent                   │ Fast Mode  │ │
+│                                                   │ 3-5 sec    │ │
+│                          Routes to                │ 2K output  │ │
+│                          Gemini provider          │ ~$0.04/img │ │
+│                          via registry             └────────────┘ │
+│                                                                   │
+│  Receives      ◄──WSS──  Returns image  ◄──API──  Nano Banana   │
+│  image in                 + text                   Pro (3 Pro)   │
+│  chat with               response                  ┌────────────┐ │
+│  description                                       │ Pro Mode   │ │
+│                                                    │ Thinking   │ │
+│                                                    │ 4K output  │ │
+│                                                    │ 97% text   │ │
+│                                                    │ 14 refs    │ │
+│                                                    └────────────┘ │
+│                                                                   │
+│  Key: Nano Banana = gemini-2.5-flash-image                       │
+│       Nano Banana Pro = gemini-3-pro-image-preview               │
+└──────────────────────────────────────────────────────────────────┘
+```
+
+### Intelligent Model Routing
+
+The routing layer automatically matches requests to the best provider:
+
+```
+Request: "Explain quantum computing"
+  │
+  ▼
+Provider Registry (keyword matching)
+  │
+  ├── Model contains "claude"?  ──► Anthropic (Claude 4.5 Opus)
+  ├── Model contains "gpt"?     ──► OpenAI (GPT-4)
+  ├── Model contains "gemini"?  ──► Google (Gemini Pro / Nano Banana)
+  ├── Model contains "deepseek"?──► DeepSeek
+  ├── Model contains "glm"?     ──► Zhipu AI (GLM-4)
+  ├── Model contains "qwen"?    ──► DashScope (Qwen)
+  ├── Model contains "kimi"?    ──► Moonshot (Kimi K2.5)
+  │
+  ├── Has OpenRouter key?       ──► OpenRouter (gateway, any model)
+  ├── Has AiHubMix key?         ──► AiHubMix (gateway, any model)
+  └── Has vLLM configured?      ──► Local inference (air-gapped)
 ```
 
 ### Components
 
 1. **Mobile App** (`/mobile/entobot_flutter/`)
    - Flutter-based native app (iOS & Android)
-   - QR code scanner for pairing
-   - Real-time chat interface
-   - Settings management
-   - Secure storage for JWT tokens
+   - QR code scanner for device pairing
+   - Real-time chat with text + image responses
+   - Model selection and provider configuration
+   - Temperature, max tokens, and parameter tuning
+   - Secure JWT token storage
 
 2. **Backend Server** (`/nanobot/`)
-   - WebSocket server (port 18791)
-   - REST API server (port 18790)
-   - Message bus for routing
-   - Agent loop with LLM integration
-   - JWT authentication
-   - Pairing management
-   - Session management
+   - WebSocket server (port 18791) — real-time bidirectional messaging
+   - REST API server (port 18790) — settings, health, provider management
+   - Message bus — async queue-based routing between channels and agents
+   - Agent loop — multi-turn conversation with tool use (up to 20 iterations)
+   - Intelligent model routing — 11-provider registry with keyword matching
+   - LiteLLM integration — unified interface for all providers
+   - JWT authentication + QR pairing — secure device onboarding
+   - Security hardening — rate limiting, audit logging, IP whitelist
 
 3. **Web Dashboard** (`/dashboard/`)
-   - Real-time monitoring
-   - QR code generation
-   - Device management
-   - Activity feed
-   - Security audit log
+   - Real-time device monitoring
+   - QR code generation for pairing
+   - Provider status and health checks
+   - Activity feed with security audit log
    - Demo mode for presentations
+
+4. **Provider Layer** (`/nanobot/providers/`)
+   - `registry.py` — 11 `ProviderSpec` definitions with routing rules
+   - `litellm_provider.py` — Unified LLM interface via `litellm.acompletion()`
+   - `base.py` — `LLMProvider` abstract base, `LLMResponse`, `ToolCallRequest`
+   - Supports gateways (OpenRouter, AiHubMix), standard providers, and local (vLLM)
 
 ## 🚀 Current Status
 
@@ -219,21 +345,34 @@ Ready to see it in action?
 
 ### Why Choose Entobot Enterprise?
 
+**No Vendor Lock-In**
+- 11 LLM providers with automatic routing
+- Switch providers without code changes — just update config
+- Gateway support (OpenRouter, AiHubMix) for 200+ models
+- Run local models with vLLM for complete independence
+- Mix providers: Claude for reasoning, Gemini for images, Groq for speed
+
+**Native Image Generation**
+- Gemini Nano Banana: fast, affordable images (~$0.039 each)
+- Nano Banana Pro: professional 4K output with legible text
+- Generate marketing assets, diagrams, and infographics in-chat
+- SynthID watermarking for AI content provenance
+- No separate image API — it's built into the conversation flow
+
 **Security First**
 - No data leaves your infrastructure
 - JWT authentication with automatic expiry
 - TLS/SSL encryption in transit
-- Complete audit logging
-- Rate limiting and DDoS protection
+- Complete audit logging for compliance
+- Rate limiting (60 req/min) and DDoS protection
 - IP whitelist support
 - OAuth2/SAML/SSO ready
 
 **Deployment Flexibility**
-- On-premises deployment
+- On-premises with vLLM (fully air-gapped)
 - Private cloud (AWS, Azure, GCP)
-- Air-gapped networks
-- Behind corporate firewalls
-- VPN-compatible
+- Railway for managed deployment
+- Behind corporate firewalls and VPNs
 - Multi-region support
 
 **Compliance Ready**
@@ -244,76 +383,110 @@ Ready to see it in action?
 - Data retention policies
 - Export capabilities
 
-**Cost Effective**
-- Use your own LLM provider (OpenAI, Anthropic, OpenRouter)
-- Or run local models with vLLM
-- No per-user licensing
-- Horizontal scaling
-- Open source foundation
-
-**Enterprise Integration**
-- REST API for automation
-- WebSocket for real-time updates
-- LDAP/Active Directory ready
-- SSO integration points
-- Webhook support
-- Custom authentication providers
+**Cost Control**
+- Route expensive queries to premium models (Claude, GPT-4)
+- Route simple queries to budget models (DeepSeek, Groq)
+- Use gateways for competitive pricing
+- Or eliminate API costs entirely with local vLLM
+- No per-user licensing. Open source foundation
 
 ### Use Cases
 
 **IT & Development Teams**
-- Internal AI assistant for developers
-- Code review and documentation
-- Infrastructure automation
-- DevOps support
+- AI-powered code review and documentation
+- Infrastructure automation with tool-calling agents
+- Multi-model comparison for evaluating outputs
+- Local deployment for sensitive codebases
+
+**Creative & Marketing**
+- Generate marketing assets with Nano Banana Pro (4K, legible text)
+- Rapid prototyping with Nano Banana (3-5 seconds)
+- Brand-consistent visuals with reference image support (up to 14)
+- Infographics and diagrams with accurate text rendering
 
 **Customer Support**
-- Agent assistance tool
-- Knowledge base access
-- Ticket automation
-- Real-time guidance
-
-**Sales & Marketing**
-- Sales enablement
-- Content generation
-- Market research
-- Lead qualification
+- Real-time agent assistance via mobile app
+- Knowledge base access with RAG integration
+- Multi-language support (Zhipu, DashScope, Moonshot)
+- Audit trail for compliance review
 
 **Executive & Management**
-- Strategic planning support
-- Data analysis
-- Report generation
-- Decision support
+- Strategic planning with premium models (Claude, GPT-4)
+- Visual reports generated via Gemini Nano Banana Pro
+- Cost-optimized: route routine queries to budget providers
+- Complete visibility via real-time dashboard
 
 ## Technology Stack
 
-**Backend:**
-- Python 3.11+
-- FastAPI (REST API)
-- WebSockets (real-time)
-- JWT (authentication)
-- SQLite/PostgreSQL (sessions)
-- LiteLLM (multi-provider)
+### AI & Model Layer
 
-**Mobile:**
-- Flutter 3.0+
-- Dart
-- WebSocket client
-- Secure storage
-- QR code scanner
+| Provider | Models | Use Case | Pricing |
+|----------|--------|----------|---------|
+| **Gemini Nano Banana** | `gemini-2.5-flash-image` | Fast image generation, high-volume tasks | ~$0.039/image |
+| **Gemini Nano Banana Pro** | `gemini-3-pro-image-preview` | Professional 4K images, text in images | Premium |
+| **Gemini Pro** | `gemini-pro`, `gemini-pro-vision` | General reasoning, multimodal | Standard |
+| **Anthropic** | Claude 4.5 Opus, Sonnet | Complex reasoning, code generation | Standard |
+| **OpenAI** | GPT-4, GPT-4 Turbo | General purpose, function calling | Standard |
+| **DeepSeek** | DeepSeek Chat, R1 | Reasoning, cost-effective | Budget |
+| **Groq** | LLaMA, Mixtral | Ultra-fast inference, transcription | Budget |
+| **Moonshot** | Kimi K2.5 | Long context, Chinese + English | Standard |
+| **Zhipu AI** | GLM-4, GLM-4 Vision | Chinese enterprise, multimodal | Regional |
+| **DashScope** | Qwen Max, Qwen Long | Alibaba ecosystem, long context | Regional |
+| **vLLM** | Any open-source model | Air-gapped / on-premises deployment | Self-hosted |
+| **OpenRouter** | 200+ models (gateway) | Model marketplace, fallback routing | Varies |
+| **AiHubMix** | Multi-provider (gateway) | API aggregation, custom headers | Varies |
 
-**Dashboard:**
-- HTML5/CSS3/JavaScript
-- WebSocket client
-- Responsive design
-- Real-time updates
+### Gemini Nano Banana: Image Generation Capabilities
 
-**Infrastructure:**
-- Docker support
-- Nginx/Caddy reverse proxy
-- Let's Encrypt TLS
-- Systemd service
-- Log rotation
+**Nano Banana** (`gemini-2.5-flash-image`):
+- 2K resolution (2048x2048)
+- 3-5 second generation time
+- Basic text rendering (70-80% accuracy)
+- Aspect ratios: 1:1, 16:9, 4:3, 9:16, 3:4
+- Best for: thumbnails, social media, rapid prototyping
+
+**Nano Banana Pro** (`gemini-3-pro-image-preview`):
+- 4K resolution (4096x4096)
+- Thinking mode (plans composition before rendering)
+- 97% text accuracy (legible text in images)
+- Up to 14 reference images (6 objects, 5 humans)
+- Grounding with Google Search (real-time data in visuals)
+- Best for: marketing assets, infographics, professional presentations
+- SynthID watermarking for provenance tracking
+
+### Backend Stack
+
+- **Python 3.11+** — asyncio-based concurrent architecture
+- **FastAPI** — REST API with automatic OpenAPI docs
+- **WebSockets** — persistent bidirectional connections
+- **LiteLLM** — unified interface to all 11 providers
+- **PyJWT** — stateless token authentication
+- **QRCode** — device pairing via camera scan
+- **SQLite/PostgreSQL** — session and audit storage
+
+### Mobile Stack
+
+- **Flutter 3.0+** — single codebase for iOS and Android
+- **Dart** — type-safe, AOT-compiled
+- **Riverpod** — reactive state management
+- **WebSocket Channel** — real-time messaging
+- **Flutter Secure Storage** — encrypted JWT storage
+- **Mobile Scanner** — QR code scanning via camera
+
+### Dashboard Stack
+
+- **HTML5/CSS3/JavaScript** — no framework dependency
+- **WebSocket client** — live updates without polling
+- **Material Design** — dark theme, responsive grid
+- **Chart.js** — real-time metric visualizations
+
+### Infrastructure
+
+- **Docker** — containerized deployment
+- **Nginx/Caddy** — reverse proxy with TLS termination
+- **Let's Encrypt** — automated TLS certificates
+- **Systemd** — service management and auto-restart
+- **Railway** — recommended cloud deployment platform
 
 ## Deployment Options
 
@@ -485,51 +658,65 @@ Enterprise transformation includes:
 
 ## Roadmap
 
-### Current (v1.0 - Demo Ready)
-- ✅ Mobile app (iOS & Android)
-- ✅ Secure WebSocket backend
-- ✅ QR code pairing
-- ✅ Real-time dashboard
-- ✅ JWT authentication
-- ✅ Audit logging
+### Current (v1.0 - Enterprise Ready)
+- ✅ Mobile app (iOS & Android) via Flutter
+- ✅ Secure WebSocket backend with JWT auth
+- ✅ QR code device pairing
+- ✅ Real-time monitoring dashboard
+- ✅ 11-provider intelligent model routing
+- ✅ Gemini Nano Banana + Nano Banana Pro support
+- ✅ Complete audit logging
+- ✅ Rate limiting and security hardening
 
 ### Short-term (v1.1)
+- [ ] **Nano Banana Pro 4K image rendering** in mobile chat
+- [ ] **Model cost dashboard** — track spend per provider in real-time
 - [ ] App store deployment (iOS App Store, Google Play)
-- [ ] Push notifications
-- [ ] Offline message queue
-- [ ] Enhanced analytics
-- [ ] Multi-language support
+- [ ] Push notifications via Firebase
+- [ ] Offline message queue with sync
+- [ ] Provider health monitoring and auto-failover
 
 ### Medium-term (v1.5)
-- [ ] Voice input/output
-- [ ] File attachments
+- [ ] **Image editing in-chat** — multi-turn Gemini image refinement
+- [ ] **Reference image upload** — use Nano Banana Pro's 14-reference system
+- [ ] Voice input/output (Groq Whisper integration)
+- [ ] File attachments with multimodal analysis
 - [ ] Group conversations
-- [ ] Advanced RAG (document search)
-- [ ] Custom workflows
+- [ ] Advanced RAG (document search with embeddings)
+- [ ] Custom agent workflows
 
 ### Long-term (v2.0)
-- [ ] Multi-tenancy
-- [ ] White-label options
-- [ ] Marketplace integrations
-- [ ] Advanced AI features
-- [ ] Enterprise federation
+- [ ] **Visual report generation** — automated infographics via Nano Banana Pro
+- [ ] **Grounded image generation** — Gemini + Google Search for real-time data visuals
+- [ ] Multi-tenancy with per-org provider routing
+- [ ] White-label mobile app builder
+- [ ] Marketplace for custom agent templates
+- [ ] Enterprise federation across organizations
 
 ## Quick Links
 
 - [Get Started in 5 Minutes](QUICKSTART.md)
-- [Demo Tonight?](DEMO.md)
-- [Enterprise Deployment](ENTERPRISE.md)
-- [Security Hardening](SECURITY_ENTERPRISE.md)
-- [Troubleshooting](TROUBLESHOOTING.md)
+- [Deployment Guide (Railway)](docs/RAILWAY_DEPLOYMENT.md)
+- [Enterprise Deployment](docs/ENTERPRISE.md)
+- [Security Hardening](docs/SECURITY_ENTERPRISE.md)
+- [Troubleshooting](docs/TROUBLESHOOTING.md)
+- [Demo Script](docs/DEMO.md)
+
+## References
+
+- [Gemini Nano Banana — Google Developers Blog](https://developers.googleblog.com/en/introducing-gemini-2-5-flash-image/)
+- [Nano Banana Pro — Google DeepMind](https://blog.google/innovation-and-ai/products/nano-banana-pro/)
+- [Gemini Image Generation API Docs](https://ai.google.dev/gemini-api/docs/image-generation)
+- [7 Tips for Nano Banana Pro](https://blog.google/products-and-platforms/products/gemini/prompting-tips-nano-banana-pro/)
 
 ---
 
 <p align="center">
   <strong>Entobot Enterprise</strong><br>
-  Secure, Mobile-First AI for the Enterprise<br><br>
-  <em>From the creators of nanobot - now enterprise-ready</em>
+  11-Provider AI Platform with Native Image Generation<br><br>
+  <em>Gemini Nano Banana | Claude | GPT-4 | DeepSeek | Groq | vLLM | and more</em>
 </p>
 
 <p align="center">
-  <sub>Built with ❤️ for enterprises that value security, control, and performance</sub>
+  <sub>Zero relay. Zero lock-in. Full control. Enterprise-ready.</sub>
 </p>
