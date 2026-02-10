@@ -37,64 +37,11 @@ class ChannelManager:
     
     def _init_channels(self) -> None:
         """Initialize channels based on config."""
-        
-        # Telegram channel
-        if self.config.channels.telegram.enabled:
-            try:
-                from nanobot.channels.telegram import TelegramChannel
-                self.channels["telegram"] = TelegramChannel(
-                    self.config.channels.telegram,
-                    self.bus,
-                    groq_api_key=self.config.providers.groq.api_key,
-                    session_manager=self.session_manager,
-                )
-                logger.info("Telegram channel enabled")
-            except ImportError as e:
-                logger.warning(f"Telegram channel not available: {e}")
-        
-        # WhatsApp channel
-        if self.config.channels.whatsapp.enabled:
-            try:
-                from nanobot.channels.whatsapp import WhatsAppChannel
-                self.channels["whatsapp"] = WhatsAppChannel(
-                    self.config.channels.whatsapp, self.bus
-                )
-                logger.info("WhatsApp channel enabled")
-            except ImportError as e:
-                logger.warning(f"WhatsApp channel not available: {e}")
 
-        # Discord channel
-        if self.config.channels.discord.enabled:
-            try:
-                from nanobot.channels.discord import DiscordChannel
-                self.channels["discord"] = DiscordChannel(
-                    self.config.channels.discord, self.bus
-                )
-                logger.info("Discord channel enabled")
-            except ImportError as e:
-                logger.warning(f"Discord channel not available: {e}")
-        
-        # Feishu channel
-        if self.config.channels.feishu.enabled:
-            try:
-                from nanobot.channels.feishu import FeishuChannel
-                self.channels["feishu"] = FeishuChannel(
-                    self.config.channels.feishu, self.bus
-                )
-                logger.info("Feishu channel enabled")
-            except ImportError as e:
-                logger.warning(f"Feishu channel not available: {e}")
-
-        # DingTalk channel
-        if self.config.channels.dingtalk.enabled:
-            try:
-                from nanobot.channels.dingtalk import DingTalkChannel
-                self.channels["dingtalk"] = DingTalkChannel(
-                    self.config.channels.dingtalk, self.bus
-                )
-                logger.info("DingTalk channel enabled")
-            except ImportError as e:
-                logger.warning(f"DingTalk channel not available: {e}")
+        # Legacy relay channels have been disabled for enterprise security.
+        # Only secure mobile app channel is supported.
+        logger.info("Enterprise mode: Legacy relay channels (Telegram, WhatsApp, Discord, Feishu, DingTalk) disabled")
+        logger.info("Use secure mobile app with QR pairing for communication")
     
     async def _start_channel(self, name: str, channel: BaseChannel) -> None:
         """Start a channel and log any exceptions."""

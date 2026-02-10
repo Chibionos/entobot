@@ -1,0 +1,17 @@
+# Ignore Python package installation
+pyproject.toml
+uv.lock
+
+# Ignore development files
+tests/
+test_*.py
+
+# Ignore mobile app
+mobile/
+
+# Ignore docs
+docs/
+
+# Ignore other large directories
+case/
+.git/
