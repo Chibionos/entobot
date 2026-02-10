@@ -1,35 +1,38 @@
-# Entobot Enterprise
+# EntoBot
 
 <div align="center">
-  <img src="assets/hero_banner.png" alt="Entobot Enterprise" width="600">
-  <h2>Enterprise-Grade Mobile AI Platform with Intelligent Multi-Model Routing</h2>
+  <img src="assets/hero_banner.png" alt="EntoBot — Security From Within" width="700">
+  <br><br>
   <p>
+    <img src="https://img.shields.io/badge/ento-内_from_within-E91E63" alt="Ento">
     <img src="https://img.shields.io/badge/python-≥3.11-blue" alt="Python">
     <img src="https://img.shields.io/badge/flutter-3.0+-02569B?logo=flutter" alt="Flutter">
-    <img src="https://img.shields.io/badge/gemini-nano_banana-4285F4?logo=google" alt="Gemini">
+    <img src="https://img.shields.io/badge/gemini-nano_banana_pro-4285F4?logo=google" alt="Gemini">
     <img src="https://img.shields.io/badge/providers-11_LLMs-orange" alt="Providers">
     <img src="https://img.shields.io/badge/license-MIT-green" alt="License">
-    <img src="https://img.shields.io/badge/status-enterprise--ready-success" alt="Status">
   </p>
+  <p><strong>Security From Within</strong> · <em>Ento (内) — "within," used in the formation of compound words</em></p>
 </div>
 
-## What is Entobot Enterprise?
+## What is EntoBot?
 
-Entobot Enterprise is a **secure, mobile-first AI platform** with **intelligent multi-model routing** across 11 LLM providers — including Google's latest **Gemini Nano Banana** and **Nano Banana Pro** models for native image generation. Built on the ultra-lightweight [nanobot](https://github.com/HKUDS/nanobot) architecture, it delivers enterprise-grade AI capabilities through a single mobile app with zero third-party relay dependencies.
+**EntoBot** is a secure, mobile-first AI platform with intelligent multi-model routing across 11 LLM providers — including Google's **Gemini Nano Banana** and **Nano Banana Pro** for native image generation. Built on the ultra-lightweight [nanobot](https://github.com/HKUDS/nanobot) architecture, it delivers enterprise-grade AI through a single mobile app with zero third-party relay dependencies.
+
+The name says it all: **Ento** (内) means *"within"* — security that's built from the inside out, not bolted on as an afterthought.
 
 **What sets it apart:**
 
+- **Security From Within** — JWT auth, QR pairing, TLS, audit logging, rate limiting — all built in, not optional
 - **11-Provider Intelligent Routing** — Automatic model selection across Gemini, Claude, GPT-4, DeepSeek, Groq, and more
 - **Native Image Generation** — Gemini Nano Banana Pro delivers 4K images with 97% text accuracy directly in-chat
 - **Zero Relay Architecture** — No WhatsApp, Telegram, or Slack middlemen. Direct WebSocket from mobile to your backend
-- **Mobile-Controlled Security** — QR code pairing, JWT auth, and full settings control from your phone
 - **Air-Gap Ready** — Runs entirely on-premises with local vLLM models. Your data never leaves your infrastructure
 
 ### What Makes This Enterprise-Ready?
 
-Traditional AI assistants rely on third-party relay services and single-provider lock-in. **Entobot Enterprise eliminates both problems:**
+Traditional AI assistants rely on third-party relay services and single-provider lock-in. **EntoBot eliminates both problems:**
 
-| Problem | Traditional | Entobot Enterprise |
+| Problem | Traditional | EntoBot |
 |---------|-----------|-------------------|
 | **Communication** | WhatsApp/Telegram relay | Direct WSS to your backend |
 | **Data Control** | Data passes through 3rd parties | Data never leaves your infra |
@@ -44,13 +47,13 @@ Traditional AI assistants rely on third-party relay services and single-provider
 [OpenClaw](https://github.com/openclaw/openclaw) is the fastest-growing open-source AI agent (180K+ GitHub stars), but it was designed as a **personal assistant** — not an enterprise platform. Security researchers have documented serious architectural issues that make it risky for business deployment:
 
 <div align="center">
-  <img src="assets/security_comparison.png" alt="Entobot vs OpenClaw Security" width="800">
+  <img src="assets/security_comparison.png" alt="EntoBot vs OpenClaw Security" width="800">
   <p><em>Security comparison — generated with Gemini Nano Banana Pro</em></p>
 </div>
 
 **The core architectural differences:**
 
-| Security Concern | OpenClaw | Entobot Enterprise |
+| Security Concern | OpenClaw | EntoBot |
 |-----------------|----------|-------------------|
 | **Default Authentication** | None — gateway binds to `0.0.0.0:18789` with no auth ([CrowdStrike](https://www.crowdstrike.com/en-us/blog/what-security-teams-need-to-know-about-openclaw-ai-super-agent/)) | JWT authentication required on every request. QR code pairing with 5-minute expiry tokens |
 | **Network Exposure** | 30,000+ instances exposed on the internet; 1,800+ leaking API keys and chat histories ([The Register](https://www.theregister.com/2026/02/05/openclaw_skills_marketplace_leaky_security/)) | WebSocket server requires authenticated connection. No API exposed without JWT token |
@@ -64,7 +67,7 @@ Traditional AI assistants rely on third-party relay services and single-provider
 | **Air-Gap Deployment** | Requires internet for relay services and marketplace skills | Fully air-gapped with local vLLM. Zero external dependencies |
 | **Shadow IT Risk** | 1 in 5 organizations deployed without IT approval ([Trend Micro](https://www.trendmicro.com/en_us/research/26/b/what-openclaw-reveals-about-agentic-assistants.html)) | Mobile app requires QR pairing with backend. Cannot operate without IT-provisioned backend |
 
-> **Bottom line**: OpenClaw is a powerful personal tool. Entobot Enterprise is built for organizations where security, compliance, and IT control are non-negotiable. Every design decision — from QR pairing to workspace sandboxing to the absence of a public marketplace — reflects an enterprise-first security posture.
+> **Bottom line**: OpenClaw is a powerful personal tool. EntoBot is built for organizations where security, compliance, and IT control are non-negotiable. Every design decision — from QR pairing to workspace sandboxing to the absence of a public marketplace — reflects an enterprise-first security posture.
 
 ## Key Features
 
@@ -86,7 +89,7 @@ Traditional AI assistants rely on third-party relay services and single-provider
 ### System Overview
 
 <div align="center">
-  <img src="assets/architecture_diagram.png" alt="Entobot Enterprise Architecture" width="800">
+  <img src="assets/architecture_diagram.png" alt="EntoBot Architecture" width="800">
   <p><em>4-layer enterprise architecture — generated with Gemini Nano Banana Pro</em></p>
 </div>
 
@@ -260,7 +263,7 @@ Ready to see it in action?
 
 ## For Enterprises
 
-### Why Choose Entobot Enterprise?
+### Why Choose EntoBot?
 
 **No Vendor Lock-In**
 - 11 LLM providers with automatic routing
@@ -444,7 +447,7 @@ Ready to see it in action?
 - 📖 **[Enterprise Deployment Guide](docs/ENTERPRISE.md)**
 
 ### ❌ Not Recommended: Vercel
-Vercel is **not suitable** for Entobot Enterprise because:
+Vercel is **not suitable** for EntoBot because:
 - ❌ No support for long-running processes (WebSocket server)
 - ❌ No support for persistent connections
 - ❌ Designed for serverless functions, not stateful services
@@ -629,11 +632,11 @@ Enterprise transformation includes:
 ---
 
 <p align="center">
-  <strong>Entobot Enterprise</strong><br>
-  11-Provider AI Platform with Native Image Generation<br><br>
-  <em>Gemini Nano Banana | Claude | GPT-4 | DeepSeek | Groq | vLLM | and more</em>
+  <img src="assets/hero_banner.png" alt="EntoBot" width="400"><br>
+  <strong>EntoBot — Security From Within (内)</strong><br>
+  <em>Gemini Nano Banana Pro · Claude · GPT-4 · DeepSeek · Groq · vLLM · 11 Providers</em>
 </p>
 
 <p align="center">
-  <sub>Zero relay. Zero lock-in. Full control. Enterprise-ready.</sub>
+  <sub>The claw carries the shield. Your data stays within.</sub>
 </p>
